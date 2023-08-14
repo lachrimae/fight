@@ -52,11 +52,18 @@ struct App {
     db_pool: deadpool_postgres::Pool,
 }
 
+impl App {
+    pub fn from_cfg(cfg: Config) -> Result<Self, ::config::ConfigError> {
+        let pool = cfg
+            .pg
+            .create_pool(Some(deadpool_postgres::Runtime::Tokio1), NoTls)
+            .unwrap();
+        Ok(App { db_pool: pool })
+    }
+}
+
 #[tokio::main]
 async fn main() {
-    let mut cfg = Config::from_env().unwrap();
-    let pool = cfg
-        .pg
-        .create_pool(Some(deadpool_postgres::Runtime::Tokio1), NoTls)
-        .unwrap();
+    let cfg = Config::from_env().unwrap();
+    let app = App::from_cfg(cfg);
 }

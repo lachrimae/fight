@@ -5,7 +5,9 @@ edition = "2021"
 
 [dependencies]
 axum = { version = "0.6.20", features = ["http2", "tracing"] }
-deadpool-postgres = "0.10.5"
+config = "0.13.3"
+deadpool-postgres = { version = "0.10.5", features = ["serde"] }
+dotenv = "0.15.0"
 serde = { version = "1.0.183", features = ["derive"] }
 tokio = { version = "1.31.0", features = ["full"] }
 tokio-postgres = "0.7.8"

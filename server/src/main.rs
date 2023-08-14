@@ -33,6 +33,7 @@ struct GameJoinInfo {
 #[derive(Debug, Deserialize)]
 struct Config {
     pg: deadpool_postgres::Config,
+    http_addr: String,
 }
 
 impl Config {
@@ -66,4 +67,27 @@ impl App {
 async fn main() {
     let cfg = Config::from_env().unwrap();
     let app = App::from_cfg(&cfg);
+
+    tracing_subscriber::fmt::init();
+    let app = axum::Router::new()
+        .route("/version", get(version))
+        .route("/games", get(get_games))
+        .route("/games", post(make_game))
+        .route("/games/:id", delete(cancel_game))
+        .route("/games/:id/join", post(join_game));
+
+    axum::Server::bind(&cfg.http_addr.parse().unwrap())
+        .serve(app.into_make_service())
+        .await
+        .unwrap();
 }
+
+async fn version() {}
+
+async fn get_games() {}
+
+async fn make_game() {}
+
+async fn cancel_game() {}
+
+async fn join_game() {}

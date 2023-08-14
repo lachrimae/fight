@@ -53,7 +53,7 @@ struct App {
 }
 
 impl App {
-    pub fn from_cfg(cfg: Config) -> Result<Self, ::config::ConfigError> {
+    pub fn from_cfg(cfg: &Config) -> Result<Self, ::config::ConfigError> {
         let pool = cfg
             .pg
             .create_pool(Some(deadpool_postgres::Runtime::Tokio1), NoTls)
@@ -65,5 +65,5 @@ impl App {
 #[tokio::main]
 async fn main() {
     let cfg = Config::from_env().unwrap();
-    let app = App::from_cfg(cfg);
+    let app = App::from_cfg(&cfg);
 }

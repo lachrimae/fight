@@ -1,4 +1,6 @@
 %syntax-version=1.0.0
-%project=fight-db
+%project=fight
 %uri=https://sr.ht/~lachrimae/fight/
 
+appschema 2023-08-14T18:31:37Z Curran McConnell <curran.mcconnell@protonmail.com> # Add schema for fight objects
+games [appschema] 2023-08-14T18:33:45Z Curran McConnell <curran.mcconnell@protonmail.com> # Creates table to track games

@@ -2,8 +2,8 @@
 
 BEGIN;
 
-  select id, state
-    from fight.games
+  select id, state, created_at, modified_at
+    from fight.game
   where false;
 
 ROLLBACK;

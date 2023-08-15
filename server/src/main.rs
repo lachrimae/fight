@@ -43,7 +43,6 @@ async fn main() {
         .route("/version", get(version))
         .route("/games", get(handler::get_lobbied_games::handler))
         .route("/games", post(make_game))
-        .route("/games/:id", delete(handler::cancel_game::handler))
         .route("/games/:id/join", post(join_game))
         .with_state(app);
 

@@ -78,7 +78,6 @@ async fn current_players(client: &Client, game_id: &Uuid<Game>) -> Vec<User> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::app::{App, Config};
     use crate::db::game::Game;
     use crate::db::user::User;
     #[tokio::test]

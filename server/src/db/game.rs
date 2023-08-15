@@ -74,7 +74,6 @@ impl FromRow for Game {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::app::{App, Config};
     use crate::db::user::User;
     #[tokio::test]
     async fn create_and_cancel() {

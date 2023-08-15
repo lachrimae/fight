@@ -34,7 +34,6 @@ impl FromRow for User {
 
 #[cfg(test)]
 mod tests {
-    use crate::app::{App, Config};
     #[tokio::test]
     async fn insert_and_get() {
         let app = &crate::test::APP;

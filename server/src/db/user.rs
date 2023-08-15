@@ -12,13 +12,13 @@ pub struct User {
     pub modified_at: DateTime<Utc>,
 }
 
-const NEW_USER: &'static str = include_str!("./user/new.sql");
+const NEW_USER: &str = include_str!("./user/new.sql");
 
 impl User {
     pub async fn new(client: &Client) -> Self {
         let stmt = client.prepare_cached(NEW_USER).await.unwrap();
         let row = &client.query(&stmt, &[]).await.unwrap()[0];
-        Self::from_row(&row)
+        Self::from_row(row)
     }
 }
 

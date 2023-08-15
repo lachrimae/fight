@@ -34,11 +34,10 @@ pub enum JoinResult {
     GameFull,
 }
 
-const JOIN_GAME: &'static str = include_str!("./game_player/join.sql");
-const LEAVE_GAME: &'static str = include_str!("./game_player/leave.sql");
-const GET_PLAYERS: &'static str = include_str!("./game_player/get_players.sql");
-const CANCEL_IF_ZERO_PLAYERS: &'static str =
-    include_str!("./game_player/cancel_if_zero_players.sql");
+const JOIN_GAME: &str = include_str!("./game_player/join.sql");
+const LEAVE_GAME: &str = include_str!("./game_player/leave.sql");
+const GET_PLAYERS: &str = include_str!("./game_player/get_players.sql");
+const CANCEL_IF_ZERO_PLAYERS: &str = include_str!("./game_player/cancel_if_zero_players.sql");
 
 pub async fn try_join_game(
     client: &Client,
@@ -50,10 +49,10 @@ pub async fn try_join_game(
         .query(&stmt, &[&game_id.inner(), &user_id.inner()])
         .await
         .unwrap();
-    if rows.len() > 0 {
-        Some(GamePlayer::from_row(&rows[0]))
-    } else {
+    if rows.is_empty() {
         None
+    } else {
+        Some(GamePlayer::from_row(&rows[0]))
     }
 }
 

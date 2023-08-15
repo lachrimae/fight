@@ -23,10 +23,10 @@ pub struct Game {
     pub modified_at: DateTime<Utc>,
 }
 
-const NEW_GAME: &'static str = include_str!("./game/new.sql");
-const CANCEL_GAME: &'static str = include_str!("./game/cancel.sql");
-const GET_GAME: &'static str = include_str!("./game/get.sql");
-const GET_LOBBIED: &'static str = include_str!("./game/get_lobbied.sql");
+const NEW_GAME: &str = include_str!("./game/new.sql");
+const CANCEL_GAME: &str = include_str!("./game/cancel.sql");
+const GET_GAME: &str = include_str!("./game/get.sql");
+const GET_LOBBIED: &str = include_str!("./game/get_lobbied.sql");
 
 impl Game {
     pub async fn new(client: &Client, initiating_user_id: &Uuid<User>) -> Self {
@@ -35,20 +35,20 @@ impl Game {
             .query_one(&stmt, &[&initiating_user_id.inner()])
             .await
             .unwrap();
-        Self::from_row(&row)
+        Self::from_row(row)
     }
 
     pub async fn cancel(self, client: &Client) -> Self {
         let stmt = client.prepare_cached(CANCEL_GAME).await.unwrap();
         let row = &client.query_one(&stmt, &[&self.id.inner()]).await.unwrap();
-        Self::from_row(&row)
+        Self::from_row(row)
     }
 
     pub async fn get(client: &Client, id: &Uuid<Game>) -> Option<Self> {
         let stmt = client.prepare_cached(GET_GAME).await.unwrap();
         let row_res = &client.query_one(&stmt, &[&id.inner()]).await;
         match row_res {
-            Ok(row) => Some(Self::from_row(&row)),
+            Ok(row) => Some(Self::from_row(row)),
             Err(_) => None,
         }
     }

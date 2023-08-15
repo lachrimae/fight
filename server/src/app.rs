@@ -1,4 +1,4 @@
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use tokio_postgres::NoTls;
 
 #[derive(Clone, Debug, Deserialize)]

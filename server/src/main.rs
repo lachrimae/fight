@@ -1,14 +1,11 @@
 use axum::{
-    extract::State,
     http::StatusCode,
     routing::{delete, get, post},
     Json,
 };
-use deadpool_postgres;
 use serde::{Deserialize, Serialize};
 use std::net::SocketAddr;
 use std::sync::Arc;
-use std::vec::Vec;
 use tokio::net::UdpSocket;
 
 mod app;
@@ -17,9 +14,7 @@ mod handler;
 mod test;
 
 use app::{App, Config};
-use db::common::FromRow;
 use db::game::Game;
-use db::user::User;
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 struct GameJoinInfo {
@@ -42,7 +37,7 @@ async fn main() {
 
     tracing_subscriber::fmt::init();
 
-    launch_udp(cfg.udp_addr.parse().unwrap());
+    launch_udp(cfg.udp_addr.parse().unwrap()).await;
 
     let http_app = axum::Router::new()
         .route("/version", get(version))
@@ -54,7 +49,8 @@ async fn main() {
 
     axum::Server::bind(&cfg.http_addr.parse().unwrap())
         .serve(http_app.into_make_service())
-        .await;
+        .await
+        .unwrap();
 }
 
 async fn version() -> (StatusCode, String) {

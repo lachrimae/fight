@@ -26,6 +26,7 @@ pub struct Game {
 const NEW_GAME: &'static str = include_str!("./game/new.sql");
 const CANCEL_GAME: &'static str = include_str!("./game/cancel.sql");
 const GET_GAME: &'static str = include_str!("./game/get.sql");
+const GET_LOBBIED: &'static str = include_str!("./game/get_lobbied.sql");
 
 impl Game {
     pub async fn new(client: &Client, initiating_user_id: &Uuid<User>) -> Self {
@@ -50,6 +51,12 @@ impl Game {
             Ok(row) => Some(Self::from_row(&row)),
             Err(_) => None,
         }
+    }
+
+    pub async fn get_lobbied(client: &Client) -> Vec<Uuid<Self>> {
+        let stmt = client.prepare_cached(GET_LOBBIED).await.unwrap();
+        let rows = &client.query(&stmt, &[]).await.unwrap();
+        rows.iter().map(|row| Uuid::new(row.get(0))).collect()
     }
 }
 
@@ -83,5 +90,15 @@ mod tests {
         game = game.cancel(&client).await;
         assert_eq!(game.state, GameState::Cancelled);
         assert_eq!(game.id, id);
+    }
+
+    async fn get_lobbied() {
+        let app = &crate::test::APP;
+        let client = app.db_pool.get().await.unwrap();
+        let user = User::new(&client).await;
+        let game = Game::new(&client, &user.id).await;
+        let lobbied_games = Game::get_lobbied(&client).await;
+        assert_eq!(lobbied_games.len(), 0);
+        assert_eq!(lobbied_games[0], game.id);
     }
 }

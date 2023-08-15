@@ -37,13 +37,13 @@ impl Game {
         Self::from_row(&row)
     }
 
-    async fn cancel(self, client: &Client) -> Self {
+    pub async fn cancel(self, client: &Client) -> Self {
         let stmt = client.prepare_cached(CANCEL_GAME).await.unwrap();
         let row = &client.query_one(&stmt, &[&self.id.inner()]).await.unwrap();
         Self::from_row(&row)
     }
 
-    async fn get(client: &Client, id: &Uuid<Game>) -> Option<Self> {
+    pub async fn get(client: &Client, id: &Uuid<Game>) -> Option<Self> {
         let stmt = client.prepare_cached(GET_GAME).await.unwrap();
         let row_res = &client.query_one(&stmt, &[&id.inner()]).await;
         match row_res {

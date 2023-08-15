@@ -13,6 +13,7 @@ use tokio::net::UdpSocket;
 
 mod app;
 mod db;
+mod handler;
 mod test;
 
 use app::{App, Config};
@@ -45,9 +46,9 @@ async fn main() {
 
     let http_app = axum::Router::new()
         .route("/version", get(version))
-        .route("/games", get(get_games))
+        .route("/games", get(handler::get_lobbied_games::handler))
         .route("/games", post(make_game))
-        .route("/games/:id", delete(cancel_game))
+        .route("/games/:id", delete(handler::cancel_game::handler))
         .route("/games/:id/join", post(join_game))
         .with_state(app);
 
@@ -60,20 +61,8 @@ async fn version() -> (StatusCode, String) {
     (StatusCode::OK, "0.1.0".to_string())
 }
 
-async fn get_games(State(app): State<Arc<App>>) -> (StatusCode, Json<Vec<Game>>) {
-    let client = app.db_pool.get().await.unwrap();
-    let stmt = client
-        .prepare_cached("select * from fight.game g where g.state == 'Lobbied'")
-        .await
-        .unwrap();
-    let rows = client.query(&stmt, &[]).await.unwrap();
-    (StatusCode::OK, Json(Game::from_rows(&rows)))
-}
-
 async fn make_game() -> (StatusCode, Json<GameJoinInfo>) {
     panic!()
 }
-
-async fn cancel_game() {}
 
 async fn join_game() {}

@@ -38,7 +38,7 @@ pub struct Game {
 }
 
 impl FromRow for Game {
-    fn from_row(row: tokio_postgres::row::Row) -> Self {
+    fn from_row(row: &tokio_postgres::row::Row) -> Self {
         Game {
             id: row.get::<usize, String>(0),
             state: GameState::from_str(row.get(1)).unwrap(),

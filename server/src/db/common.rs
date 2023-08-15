@@ -1,6 +1,6 @@
 pub trait FromRow {
-    fn from_row(row: tokio_postgres::row::Row) -> Self;
-    fn from_rows(rows: Vec<tokio_postgres::row::Row>) -> Vec<Self>
+    fn from_row(row: &tokio_postgres::row::Row) -> Self;
+    fn from_rows(rows: &Vec<tokio_postgres::row::Row>) -> Vec<Self>
     where
         Self: Sized,
     {

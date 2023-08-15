@@ -100,7 +100,7 @@ async fn get_games(State(app): State<Arc<App>>) -> (StatusCode, Json<Vec<Game>>)
         .await
         .unwrap();
     let rows = client.query(&stmt, &[]).await.unwrap();
-    (StatusCode::OK, Json(Game::from_rows(rows)))
+    (StatusCode::OK, Json(Game::from_rows(&rows)))
 }
 
 async fn make_game() -> (StatusCode, Json<GameJoinInfo>) {

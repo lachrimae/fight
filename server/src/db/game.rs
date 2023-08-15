@@ -2,9 +2,6 @@ use chrono::prelude::*;
 use deadpool_postgres::Client;
 use postgres_types::{FromSql, ToSql};
 use serde::{Deserialize, Serialize};
-use std::boxed::Box;
-use std::fmt;
-use std::str::FromStr;
 use uuid::Uuid;
 
 use crate::db::common::FromRow;
@@ -15,22 +12,6 @@ pub enum GameState {
     Started,
     Completed,
     Cancelled,
-}
-
-impl FromStr for GameState {
-    type Err = Box<dyn std::error::Error>;
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s {
-            "Lobbied" => Ok(GameState::Lobbied),
-            "Started" => Ok(GameState::Started),
-            "Completed" => Ok(GameState::Completed),
-            "Cancelled" => Ok(GameState::Cancelled),
-            _ => Err(Box::new(std::io::Error::new(
-                std::io::ErrorKind::Other,
-                format!("Could not parse GameState {}", s),
-            ))),
-        }
-    }
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]

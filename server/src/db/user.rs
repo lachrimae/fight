@@ -2,11 +2,12 @@ use crate::db::common::FromRow;
 use chrono::prelude::*;
 use deadpool_postgres::Client;
 use serde::{Deserialize, Serialize};
-use uuid::Uuid;
 
-#[derive(Clone, Debug, Deserialize, Serialize)]
+use crate::db::common::*;
+
+#[derive(Clone, Copy, Debug, Deserialize, Serialize)]
 pub struct User {
-    pub id: Uuid,
+    pub id: Uuid<User>,
     pub created_at: DateTime<Utc>,
     pub modified_at: DateTime<Utc>,
 }
@@ -24,7 +25,7 @@ impl User {
 impl FromRow for User {
     fn from_row(row: &tokio_postgres::row::Row) -> Self {
         User {
-            id: row.get(0),
+            id: Uuid::<User>::new(row.get(0)),
             created_at: row.get(1),
             modified_at: row.get(2),
         }

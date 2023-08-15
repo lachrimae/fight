@@ -25,4 +25,7 @@ BEGIN;
     for each row
   execute procedure fight.update_game_player_timestamp();
 
+  create unique index game_player_user_id_idx
+    on fight.game_player (user_id);
+
 COMMIT;

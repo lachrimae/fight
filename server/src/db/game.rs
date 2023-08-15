@@ -3,11 +3,11 @@ use deadpool_postgres::Client;
 use postgres_types::{FromSql, ToSql};
 use serde::{Deserialize, Serialize};
 use std::option::Option;
-use uuid::Uuid;
 
-use crate::db::common::FromRow;
+use crate::db::common::*;
+use crate::db::user::User;
 
-#[derive(Clone, Debug, Deserialize, Serialize, ToSql, FromSql, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, ToSql, FromSql, PartialEq, Eq)]
 pub enum GameState {
     Lobbied,
     Started,
@@ -15,9 +15,9 @@ pub enum GameState {
     Cancelled,
 }
 
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Copy, Debug, Deserialize, Serialize)]
 pub struct Game {
-    pub id: Uuid,
+    pub id: Uuid<Game>,
     pub state: GameState,
     pub created_at: DateTime<Utc>,
     pub modified_at: DateTime<Utc>,
@@ -28,10 +28,10 @@ const CANCEL_GAME: &'static str = include_str!("./game/cancel.sql");
 const GET_GAME: &'static str = include_str!("./game/get.sql");
 
 impl Game {
-    async fn new(client: &Client, initiating_user_id: &Uuid) -> Self {
+    pub async fn new(client: &Client, initiating_user_id: &Uuid<User>) -> Self {
         let stmt = client.prepare_cached(NEW_GAME).await.unwrap();
         let row = &client
-            .query_one(&stmt, &[&initiating_user_id])
+            .query_one(&stmt, &[&initiating_user_id.inner()])
             .await
             .unwrap();
         Self::from_row(&row)
@@ -39,13 +39,13 @@ impl Game {
 
     async fn cancel(self, client: &Client) -> Self {
         let stmt = client.prepare_cached(CANCEL_GAME).await.unwrap();
-        let row = &client.query_one(&stmt, &[&self.id]).await.unwrap();
+        let row = &client.query_one(&stmt, &[&self.id.inner()]).await.unwrap();
         Self::from_row(&row)
     }
 
-    async fn get(client: &Client, id: &Uuid) -> Option<Self> {
+    async fn get(client: &Client, id: &Uuid<Game>) -> Option<Self> {
         let stmt = client.prepare_cached(GET_GAME).await.unwrap();
-        let row_res = &client.query_one(&stmt, &[&id]).await;
+        let row_res = &client.query_one(&stmt, &[&id.inner()]).await;
         match row_res {
             Ok(row) => Some(Self::from_row(&row)),
             Err(_) => None,
@@ -56,7 +56,7 @@ impl Game {
 impl FromRow for Game {
     fn from_row(row: &tokio_postgres::row::Row) -> Self {
         Game {
-            id: row.get(0),
+            id: Uuid::new(row.get(0)),
             state: row.get(1),
             created_at: row.get(2),
             modified_at: row.get(3),

@@ -43,7 +43,7 @@ async fn main() {
         .route("/version", get(version))
         .route("/games", get(handler::get_lobbied_games::handler))
         .route("/games", post(make_game))
-        .route("/games/:id/join", post(join_game))
+        .route("/games/:id/join", post(handler::join_game::handler))
         .with_state(app);
 
     axum::Server::bind(&cfg.http_addr.parse().unwrap())
@@ -59,5 +59,3 @@ async fn version() -> (StatusCode, String) {
 async fn make_game() -> (StatusCode, Json<GameJoinInfo>) {
     panic!()
 }
-
-async fn join_game() {}

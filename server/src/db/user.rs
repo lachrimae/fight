@@ -1,6 +1,6 @@
 use crate::db::common::FromRow;
+use deadpool_postgres::Client;
 use serde::{Deserialize, Serialize};
-use tokio_postgres::Client;
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct User {
@@ -10,16 +10,15 @@ pub struct User {
 }
 
 impl User {
-    async fn make_new(client: Client) -> Self {
-        Self::from_row(
-            &client
-                .query(
-                    "insert into fight.user (id, created_at, modified_at) values ('', '', '')",
-                    &[],
-                )
-                .await
-                .unwrap()[0],
-        )
+    async fn make_new(client: &Client) -> Self {
+        let stmt = client
+            .prepare_cached(
+                "insert into fight.user default values returning (id, created_at, modified_at)",
+            )
+            .await
+            .unwrap();
+        let row = &client.query(&stmt, &[]).await.unwrap()[0];
+        Self::from_row(&row)
     }
 }
 
@@ -35,10 +34,13 @@ impl FromRow for User {
 
 #[cfg(test)]
 mod tests {
-    #[test]
-    fn insert_and_get() {
-        let cfg = Config::from_env();
-        let app = App::from_cfg(&cfg);
-        let user = User::make_new(app.db_pool.get());
+    use crate::app::{App, Config};
+    #[tokio::test]
+    async fn insert_and_get() {
+        let cfg = Config::from_env().unwrap();
+        let app = App::from_cfg(&cfg).unwrap();
+        let client = app.db_pool.get().await.unwrap();
+        let user = super::User::make_new(&client).await;
+        println!("{:#?}", user);
     }
 }

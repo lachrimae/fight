@@ -10,7 +10,6 @@ use std::net::SocketAddr;
 use std::sync::Arc;
 use std::vec::Vec;
 use tokio::net::UdpSocket;
-use tokio_postgres::NoTls;
 
 mod app;
 mod db;

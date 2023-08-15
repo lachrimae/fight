@@ -71,8 +71,7 @@ mod tests {
     use crate::db::user::User;
     #[tokio::test]
     async fn create_and_cancel() {
-        let cfg = Config::from_env().unwrap();
-        let app = App::from_cfg(&cfg).unwrap();
+        let app = &crate::test::APP;
         let client = app.db_pool.get().await.unwrap();
         let user = User::new(&client).await;
         let mut game = Game::new(&client, &user.id).await;

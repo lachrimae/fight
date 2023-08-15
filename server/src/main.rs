@@ -13,6 +13,7 @@ use tokio::net::UdpSocket;
 
 mod app;
 mod db;
+mod test;
 
 use app::{App, Config};
 use db::common::FromRow;

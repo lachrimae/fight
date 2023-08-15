@@ -37,8 +37,7 @@ mod tests {
     use crate::app::{App, Config};
     #[tokio::test]
     async fn insert_and_get() {
-        let cfg = Config::from_env().unwrap();
-        let app = App::from_cfg(&cfg).unwrap();
+        let app = &crate::test::APP;
         let client = app.db_pool.get().await.unwrap();
         let user = super::User::new(&client).await;
     }

@@ -84,8 +84,7 @@ mod tests {
     use crate::db::user::User;
     #[tokio::test]
     async fn test_try_join_game() {
-        let cfg = Config::from_env().unwrap();
-        let app = App::from_cfg(&cfg).unwrap();
+        let app = &crate::test::APP;
         let client = app.db_pool.get().await.unwrap();
         let player = User::new(&client).await;
         let game = Game::new(&client, &player.id).await;
@@ -95,8 +94,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_leave_game() {
-        let cfg = Config::from_env().unwrap();
-        let app = App::from_cfg(&cfg).unwrap();
+        let app = &crate::test::APP;
         let mut client = app.db_pool.get().await.unwrap();
         let player = User::new(&client).await;
         let game = Game::new(&client, &player.id).await;
@@ -109,8 +107,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_second_player_joins() {
-        let cfg = Config::from_env().unwrap();
-        let app = App::from_cfg(&cfg).unwrap();
+        let app = &crate::test::APP;
         let mut client = app.db_pool.get().await.unwrap();
         let player1 = User::new(&client).await;
         let player2 = User::new(&client).await;
@@ -130,9 +127,8 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_error_on_third_player() {
-        let cfg = Config::from_env().unwrap();
-        let app = App::from_cfg(&cfg).unwrap();
+    async fn test_three_player_join_leave() {
+        let app = &crate::test::APP;
         let mut client = app.db_pool.get().await.unwrap();
         let player1 = User::new(&client).await;
         let player2 = User::new(&client).await;
@@ -142,6 +138,13 @@ mod tests {
             .await
             .is_some());
         assert!(try_join_game(&client, &game.id, &player3.id)
+            .await
+            .is_none());
+        leave_game(&mut client, &game.id, &player1.id).await;
+        assert!(try_join_game(&client, &game.id, &player3.id)
+            .await
+            .is_some());
+        assert!(try_join_game(&client, &game.id, &player1.id)
             .await
             .is_none());
     }

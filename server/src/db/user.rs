@@ -34,4 +34,11 @@ impl FromRow for User {
 }
 
 #[cfg(test)]
-mod tests {}
+mod tests {
+    #[test]
+    fn insert_and_get() {
+        let cfg = Config::from_env();
+        let app = App::from_cfg(&cfg);
+        let user = User::make_new(app.db_pool.get());
+    }
+}

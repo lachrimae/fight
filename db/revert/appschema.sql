@@ -3,5 +3,6 @@
 BEGIN;
 
   drop schema fight;
+  drop extension "pgcrypto";
 
 COMMIT;

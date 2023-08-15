@@ -5,8 +5,6 @@ BEGIN;
 
   create type fight."GameState" as enum('Lobbied', 'Started', 'Completed', 'Cancelled');
 
-  create extension if not exists "pgcrypto";
-
   create table fight.game (
     id uuid primary key default gen_random_uuid(),
     state fight."GameState" not null,

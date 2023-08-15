@@ -9,6 +9,4 @@ BEGIN;
 
   drop type fight."GameState";
 
-  drop extension if exists "pgcrypto";
-
 COMMIT;

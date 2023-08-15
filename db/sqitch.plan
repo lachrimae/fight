@@ -5,3 +5,4 @@
 appschema 2023-08-14T18:31:37Z Curran McConnell <curran.mcconnell@protonmail.com> # Add schema for fight objects
 games [appschema] 2023-08-14T18:33:45Z Curran McConnell <curran.mcconnell@protonmail.com> # Creates table to track games
 users [appschema] 2023-08-14T18:53:29Z Curran McConnell <curran.mcconnell@protonmail.com> # Creates a table to track users
+game_player [games users appschema] 2023-08-15T18:23:00Z Curran McConnell <curran.mcconnell@protonmail.com> # Add players to games

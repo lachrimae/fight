@@ -14,7 +14,7 @@ pub struct User {
 const NEW_USER: &'static str = include_str!("./user/new.sql");
 
 impl User {
-    async fn new(client: &Client) -> Self {
+    pub async fn new(client: &Client) -> Self {
         let stmt = client.prepare_cached(NEW_USER).await.unwrap();
         let row = &client.query(&stmt, &[]).await.unwrap()[0];
         Self::from_row(&row)

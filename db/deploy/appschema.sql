@@ -2,6 +2,7 @@
 
 BEGIN;
 
+  create extension "pgcrypto";
   create schema fight;
 
 COMMIT;

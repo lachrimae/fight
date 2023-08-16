@@ -1,3 +1,4 @@
+use lapin::{options::*, types::FieldTable, Connection, ConnectionProperties};
 use serde::Deserialize;
 use tokio_postgres::NoTls;
 
@@ -5,7 +6,7 @@ use tokio_postgres::NoTls;
 pub struct Config {
     pub pg: deadpool_postgres::Config,
     pub http_addr: String,
-    pub udp_addr: String,
+    pub amqp_addr: String,
 }
 
 impl Config {
@@ -17,6 +18,7 @@ impl Config {
         cfg.pg.manager = Some(deadpool_postgres::ManagerConfig {
             recycling_method: deadpool_postgres::RecyclingMethod::Fast,
         });
+
         Ok(cfg)
     }
 }
@@ -24,14 +26,29 @@ impl Config {
 #[derive(Clone)]
 pub struct App {
     pub db_pool: deadpool_postgres::Pool,
+    // pub new_game_channel: lapin::Channel,
 }
 
 impl App {
-    pub fn from_cfg(cfg: &Config) -> Result<Self, ::config::ConfigError> {
+    pub async fn from_cfg(cfg: &Config) -> Result<Self, ::config::ConfigError> {
         let pool = cfg
             .pg
             .create_pool(Some(deadpool_postgres::Runtime::Tokio1), NoTls)
             .unwrap();
-        Ok(App { db_pool: pool })
+
+        // let conn = Connection::connect(&cfg.amqp_addr, ConnectionProperties::default())
+        //     .await
+        //     .unwrap();
+        // let new_game_channel = conn.create_channel().await.unwrap();
+        // new_game_channel.queue_declare(
+        //     "games_needing_servers",
+        //     QueueDeclareOptions::default(),
+        //     FieldTable::default(),
+        // );
+
+        Ok(App {
+            db_pool: pool,
+            // new_game_channel: new_game_channel,
+        })
     }
 }

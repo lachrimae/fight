@@ -1,2 +1,3 @@
 [workspace]
-members = ["common", "client", "server"]
+members = ["common", "client", "server", "headless"]
+resolver = "2"

@@ -24,7 +24,7 @@ struct GameJoinInfo {
 #[tokio::main]
 async fn main() {
     let cfg = Config::from_env().unwrap();
-    let app = Arc::new(App::from_cfg(&cfg).unwrap());
+    let app = Arc::new(App::from_cfg(&cfg).await.unwrap());
 
     tracing_subscriber::fmt::init();
 

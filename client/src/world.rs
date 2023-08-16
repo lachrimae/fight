@@ -1,8 +1,8 @@
-use crate::types::*;
+
 use bevy::log;
 use bevy::prelude::*;
 use bevy_ggrs::AddRollbackCommandExtension;
-use bevy_ggrs::Session;
+
 use ggrs::PlayerHandle;
 use std::default::Default;
 
@@ -84,6 +84,7 @@ pub fn acceleration_system(mut query: Query<(&mut Velocity, &Acceleration), With
 // and actives RightTilt will do a FAir or BAir
 // depending on their orientation.
 #[derive(Debug, Reflect)]
+#[derive(Default)]
 pub enum IntentKind {
     GoRight,
     GoLeft,
@@ -92,23 +93,20 @@ pub enum IntentKind {
     LeftTilt,
     DownTilt,
     Jump,
+    #[default]
     Neutral,
     Crouch,
     CrawlRight,
     CrawlLeft,
 }
 
-impl Default for IntentKind {
-    fn default() -> Self {
-        IntentKind::Neutral
-    }
-}
+
 
 #[derive(Component, Default, Reflect, Debug)]
 pub struct Intent(pub IntentKind);
 
 pub fn startup_system(mut commands: Commands) {
-    let num_players = 2;
+    let _num_players = 2;
     log::debug!("Spawning camera");
     commands.spawn(Camera2dBundle::default());
     log::debug!("Spawning fighters");

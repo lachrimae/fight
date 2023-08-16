@@ -6,7 +6,7 @@ use bytemuck::{Pod, Zeroable};
 use ggrs::PlayerHandle;
 use std::collections::HashMap;
 
-use crate::types::*;
+
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
@@ -58,11 +58,11 @@ const KEYCODES_OF_INTEREST: &[KeyCode] = &[
 
 const fn keycode_mapper(keycode: &KeyCode) -> Option<DiscreteInput> {
     match keycode {
-        (KeyCode::A) => Some(DiscreteInput::Left),
-        (KeyCode::S) => Some(DiscreteInput::Down),
-        (KeyCode::D) => Some(DiscreteInput::Right),
-        (KeyCode::W) => Some(DiscreteInput::Jump),
-        (KeyCode::Space) => Some(DiscreteInput::Hit),
+        KeyCode::A => Some(DiscreteInput::Left),
+        KeyCode::S => Some(DiscreteInput::Down),
+        KeyCode::D => Some(DiscreteInput::Right),
+        KeyCode::W => Some(DiscreteInput::Jump),
+        KeyCode::Space => Some(DiscreteInput::Hit),
         _ => None,
     }
 }

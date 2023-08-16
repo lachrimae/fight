@@ -4,7 +4,7 @@ use bevy::log;
 use bevy::prelude::*;
 use bevy::window::WindowResolution;
 use bevy_ggrs::{GgrsAppExtension, GgrsPlugin, GgrsSchedule, Session};
-use ggrs::{GGRSEvent as GgrsEvent, PlayerType, SessionBuilder, UdpNonBlockingSocket};
+use ggrs::{PlayerType, SessionBuilder, UdpNonBlockingSocket};
 
 use std::net::SocketAddr;
 use std::str::FromStr;

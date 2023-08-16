@@ -35,6 +35,10 @@ pub struct Position {
     pub y: i32,
 }
 
+fn posn_to_translation(p: Position) -> Vec2 {
+    Vec2::new(p.x as f32, p.y as f32)
+}
+
 #[derive(Component, Reflect, Default)]
 pub struct Moving {}
 
@@ -76,6 +80,8 @@ pub fn startup_system(
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
     let num_players = 2;
+    log::debug!("Spawning camera");
+    commands.spawn(Camera2dBundle::default());
     log::debug!("Spawning fighters");
     commands.spawn_batch(vec![
         (
@@ -89,9 +95,16 @@ pub fn startup_system(
                 width: 80,
                 height: 80,
             },
-            PbrBundle {
-                mesh: meshes.add(Mesh::from(shape::Cube { size: 80. })),
-                material: materials.add(Color::rgb(0.9, 0.2, 0.2).into()),
+            SpriteBundle {
+                transform: Transform {
+                    translation: Vec3::new(-50., 0., 0.),
+                    scale: Vec3::new(20., 20., 20.),
+                    ..default()
+                },
+                sprite: Sprite {
+                    color: Color::rgb(1., 0.47, 0.),
+                    ..default()
+                },
                 ..default()
             },
         ),
@@ -106,9 +119,16 @@ pub fn startup_system(
                 width: 80,
                 height: 80,
             },
-            PbrBundle {
-                mesh: meshes.add(Mesh::from(shape::Cube { size: 80. })),
-                material: materials.add(Color::rgb(0., 0.35, 0.8).into()),
+            SpriteBundle {
+                transform: Transform {
+                    translation: Vec3::new(50., 0., 0.),
+                    scale: Vec3::new(20., 20., 20.),
+                    ..default()
+                },
+                sprite: Sprite {
+                    color: Color::rgb(0., 0.47, 1.),
+                    ..default()
+                },
                 ..default()
             },
         ),

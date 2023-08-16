@@ -12,6 +12,7 @@ use std::str::FromStr;
 const FPS: usize = 60;
 
 mod input;
+mod intent;
 mod types;
 mod world;
 
@@ -19,6 +20,7 @@ mod world;
 struct NetworkStatsTimer(Timer);
 
 use crate::input::*;
+use crate::intent::*;
 use crate::types::*;
 use crate::world::*;
 
@@ -72,6 +74,7 @@ fn main() {
         (movement_system, acceleration_system.after(movement_system)),
     )
     .insert_resource(Session::P2P(sess))
+    .insert_resource(ClearColor(Color::rgb(0.9, 0.9, 0.9)))
     .insert_resource(NetworkStatsTimer(Timer::from_seconds(
         2.0,
         TimerMode::Repeating,

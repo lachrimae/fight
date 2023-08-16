@@ -35,12 +35,16 @@ impl CombinedInput {
         CombinedInput(0)
     }
 
-    pub const fn set(mut self, button: DiscreteInput, state: ButtonState) {
+    pub fn set(&mut self, button: DiscreteInput, state: ButtonState) {
         let flag = shift_flag(button);
         match state {
             ButtonState::Pressed => self.0 |= flag,
             ButtonState::Released => self.0 &= !flag,
-        }
+        };
+    }
+
+    pub const fn is_pressed(&self, button: DiscreteInput) -> bool {
+        self.0 << shift_flag(button) != 0
     }
 }
 

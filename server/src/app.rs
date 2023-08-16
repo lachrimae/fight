@@ -23,7 +23,6 @@ impl Config {
     }
 }
 
-#[derive(Clone)]
 pub struct App {
     pub db_pool: deadpool_postgres::Pool,
     // pub new_game_channel: lapin::Channel,

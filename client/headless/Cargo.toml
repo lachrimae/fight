@@ -7,6 +7,7 @@ edition = "2021"
 bevy = { version = "0.11.1", features = ["dynamic_linking"] }
 serde = "1.0.183"
 fight-common = { path = "../common" }
+config = "0.13.3"
 
 [profile.dev]
 opt-level = 1

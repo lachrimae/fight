@@ -1,4 +1,8 @@
+use bevy::log;
 use bevy::prelude::*;
+use std::option::Option;
+
+mod input;
 
 #[derive(Component)]
 pub struct Fighter {}
@@ -51,21 +55,24 @@ pub struct Acceleration {
     pub y: i32,
 }
 
-pub fn acceleration_system(mut query: Query<(&mut Velocity, &Acceleration), With<Accelerating>>) {
-    for (mut velocity, acceleration) in &mut query {
-        velocity.x += acceleration.x;
-        velocity.y += acceleration.y;
-    }
-}
-
 pub fn movement_system(mut query: Query<(&mut Position, &Velocity), With<Moving>>) {
+    log::debug!("movement system beginning");
     for (mut position, velocity) in &mut query {
         position.x += velocity.x;
         position.y += velocity.y;
     }
 }
 
+pub fn acceleration_system(mut query: Query<(&mut Velocity, &Acceleration), With<Accelerating>>) {
+    log::debug!("acceleration system beginning");
+    for (mut velocity, acceleration) in &mut query {
+        velocity.x += acceleration.x;
+        velocity.y += acceleration.y;
+    }
+}
+
 pub fn startup_system(mut commands: Commands) {
+    log::debug!("Spawning fighters");
     commands.spawn_batch(vec![
         (
             Fighter {},

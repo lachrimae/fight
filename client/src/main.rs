@@ -5,7 +5,7 @@ use bevy::prelude::*;
 use bevy::window::WindowResolution;
 use bevy_ggrs::{GgrsAppExtension, GgrsPlugin, GgrsSchedule, Session};
 use ggrs::{GGRSEvent as GgrsEvent, PlayerType, SessionBuilder, UdpNonBlockingSocket};
-use std::collections::HashMap;
+
 use std::net::SocketAddr;
 use std::str::FromStr;
 
@@ -28,7 +28,7 @@ impl ggrs::Config for GgrsConfig {
 }
 
 use crate::input::*;
-use crate::types::*;
+
 use crate::world::*;
 
 fn main() {

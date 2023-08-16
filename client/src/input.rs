@@ -54,11 +54,11 @@ const keycodes_of_interest: &[KeyCode] = &[
 
 const fn keycode_mapper(keycode: &KeyCode) -> Option<DiscreteInput> {
     match keycode {
-        (KeyCode::A) => Some(DiscreteInput::Left),
-        (KeyCode::S) => Some(DiscreteInput::Down),
-        (KeyCode::D) => Some(DiscreteInput::Right),
-        (KeyCode::W) => Some(DiscreteInput::Jump),
-        (KeyCode::Space) => Some(DiscreteInput::Hit),
+        KeyCode::A => Some(DiscreteInput::Left),
+        KeyCode::S => Some(DiscreteInput::Down),
+        KeyCode::D => Some(DiscreteInput::Right),
+        KeyCode::W => Some(DiscreteInput::Jump),
+        KeyCode::Space => Some(DiscreteInput::Hit),
         _ => None,
     }
 }
@@ -66,7 +66,7 @@ const fn keycode_mapper(keycode: &KeyCode) -> Option<DiscreteInput> {
 // TODO: Debug unreliable inputs
 pub fn input(In(_handle): In<PlayerHandle>, keyboard_input: Res<Input<KeyCode>>) -> CombinedInput {
     log::debug!("Registering inputs");
-    let mut input = CombinedInput::new();
+    let input = CombinedInput::new();
     // We want older events to have precedence over newer ones, thus reverse iterate
     for keycode in keycodes_of_interest {
         if keyboard_input.pressed(*keycode) {

@@ -1,12 +1,11 @@
 use axum::{
     http::StatusCode,
-    routing::{delete, get, post},
+    routing::{get, post},
     Json,
 };
 use serde::{Deserialize, Serialize};
 use std::net::SocketAddr;
 use std::sync::Arc;
-use tokio::net::UdpSocket;
 
 mod app;
 mod db;
@@ -22,22 +21,12 @@ struct GameJoinInfo {
     game: Game,
 }
 
-async fn launch_udp(udp_socket: SocketAddr) {
-    let socket = UdpSocket::bind(udp_socket).await.unwrap();
-    let mut buf = vec![0; 1024];
-    loop {
-        let (size, peer) = socket.recv_from(&mut buf).await.unwrap();
-    }
-}
-
 #[tokio::main]
 async fn main() {
     let cfg = Config::from_env().unwrap();
     let app = Arc::new(App::from_cfg(&cfg).unwrap());
 
     tracing_subscriber::fmt::init();
-
-    launch_udp(cfg.udp_addr.parse().unwrap()).await;
 
     let http_app = axum::Router::new()
         .route("/version", get(version))

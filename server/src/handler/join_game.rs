@@ -11,13 +11,13 @@ use crate::db::game_player;
 use crate::db::game_player::GamePlayer;
 use crate::db::user::User;
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Serialize)]
 pub struct Request {
     pub game_id: Uuid<Game>,
     pub user_id: Uuid<User>,
 }
 
-#[derive(Serialize)]
+#[derive(Deserialize, Serialize)]
 pub struct Response {
     pub game_player_id: Option<Uuid<GamePlayer>>,
 }

@@ -3,6 +3,7 @@ use bevy::log;
 use bevy::prelude::*;
 use bevy_ggrs::Session;
 use ggrs::PlayerHandle;
+use std::default::Default;
 
 #[derive(Component, Reflect, Default)]
 pub struct Fighter {}
@@ -19,7 +20,7 @@ pub struct CollisionRect {
     pub height: i32,
 }
 
-#[derive(Component, Reflect, Default)]
+#[derive(Component, Reflect, Default, Debug)]
 pub struct Allegiance {
     pub handle: PlayerHandle,
 }
@@ -81,6 +82,7 @@ pub fn acceleration_system(mut query: Query<(&mut Velocity, &Acceleration), With
 // For example, a character who is falling
 // and actives RightTilt will do a FAir or BAir
 // depending on their orientation.
+#[derive(Debug, Reflect)]
 pub enum IntentKind {
     GoRight,
     GoLeft,
@@ -95,7 +97,13 @@ pub enum IntentKind {
     CrawlLeft,
 }
 
-#[derive(Component)]
+impl Default for IntentKind {
+    fn default() -> Self {
+        IntentKind::Neutral
+    }
+}
+
+#[derive(Component, Default, Reflect, Debug)]
 pub struct Intent(pub IntentKind);
 
 pub fn startup_system(
@@ -112,6 +120,7 @@ pub fn startup_system(
         (
             Fighter {},
             Allegiance { handle: 0 },
+            Intent(IntentKind::Neutral),
             Position { x: -50, y: 0 },
             Velocity { x: 0, y: 0 },
             Acceleration { x: 0, y: 0 },
@@ -136,6 +145,7 @@ pub fn startup_system(
         (
             Fighter {},
             Allegiance { handle: 1 },
+            Intent(IntentKind::Neutral),
             Position { x: 50, y: 50 },
             Velocity { x: 0, y: 0 },
             Acceleration { x: 0, y: 0 },

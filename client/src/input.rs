@@ -67,7 +67,6 @@ const fn keycode_mapper(keycode: &KeyCode) -> Option<DiscreteInput> {
     }
 }
 
-// TODO: Debug unreliable inputs
 pub fn input(In(_handle): In<PlayerHandle>, keyboard_input: Res<Input<KeyCode>>) -> CombinedInput {
     log::debug!("Registering inputs");
     let mut input = CombinedInput::new();

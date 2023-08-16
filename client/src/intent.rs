@@ -2,6 +2,7 @@ use crate::input;
 use crate::input::{CombinedInput, DiscreteInput};
 use crate::types::*;
 use crate::world::{Allegiance, Intent, IntentKind};
+use bevy::log;
 use bevy::prelude::*;
 use bevy_ggrs::{PlayerInputs, Rollback};
 
@@ -42,4 +43,14 @@ fn mk_command(input: CombinedInput) -> Intent {
         }
     };
     Intent(inner)
+}
+
+pub fn set_intent_system(
+    mut query: Query<(&mut Intent, &Allegiance), With<Rollback>>,
+    keyboard_input: Res<PlayerInputs<GgrsConfig>>,
+) {
+    for (mut intent, allegiance) in query.iter_mut() {
+        *intent = mk_command(keyboard_input[allegiance.handle].0);
+        log::debug!("Player {:?} has intent {:?}", allegiance, intent);
+    }
 }

@@ -66,19 +66,24 @@ fn main() {
             .register_rollback_component::<DoesDamage>()
             .register_rollback_component::<CollisionRect>()
             .register_rollback_component::<Allegiance>()
+            .register_rollback_component::<Intent>()
             .register_rollback_component::<Stocks>(),
     )
     .add_systems(Startup, startup_system)
-    .add_systems(
-        GgrsSchedule,
-        (movement_system, acceleration_system.after(movement_system)),
-    )
-    .insert_resource(Session::P2P(sess))
-    .insert_resource(ClearColor(Color::rgb(0.9, 0.9, 0.9)))
     .insert_resource(NetworkStatsTimer(Timer::from_seconds(
         2.0,
         TimerMode::Repeating,
     )))
+    .insert_resource(Session::P2P(sess))
+    .add_systems(
+        GgrsSchedule,
+        (
+            intent::set_intent_system,
+            movement_system.after(set_intent_system),
+            acceleration_system.after(movement_system),
+        ),
+    )
+    .insert_resource(ClearColor(Color::rgb(0.9, 0.9, 0.9)))
     .add_systems(Update, print_network_stats_system)
     .add_systems(Update, print_events_system);
     log::info!("Running Bevy app");

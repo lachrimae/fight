@@ -6,6 +6,6 @@ pub struct GgrsConfig;
 
 impl ggrs::Config for GgrsConfig {
     type Input = CombinedInput;
-    type State = u8;
+    type State = ();
     type Address = SocketAddr;
 }

@@ -67,7 +67,10 @@ const fn keycode_mapper(keycode: &KeyCode) -> Option<DiscreteInput> {
     }
 }
 
-pub fn input(In(_handle): In<PlayerHandle>, keyboard_input: Res<Input<KeyCode>>) -> CombinedInput {
+pub fn input_system(
+    In(_handle): In<PlayerHandle>,
+    keyboard_input: Res<Input<KeyCode>>,
+) -> CombinedInput {
     log::debug!("Registering inputs");
     let mut input = CombinedInput::new();
     // We want older events to have precedence over newer ones, thus reverse iterate
@@ -76,6 +79,6 @@ pub fn input(In(_handle): In<PlayerHandle>, keyboard_input: Res<Input<KeyCode>>)
             input.set(keycode_mapper(keycode).unwrap(), ButtonState::Pressed);
         }
     }
-    log::info!("{:#?}", input);
+    log::debug!("{:#?}", input);
     input
 }

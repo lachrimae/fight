@@ -1,6 +1,7 @@
 use crate::types::*;
 use bevy::log;
 use bevy::prelude::*;
+use bevy_ggrs::AddRollbackCommandExtension;
 use bevy_ggrs::Session;
 use ggrs::PlayerHandle;
 use std::default::Default;
@@ -106,18 +107,13 @@ impl Default for IntentKind {
 #[derive(Component, Default, Reflect, Debug)]
 pub struct Intent(pub IntentKind);
 
-pub fn startup_system(
-    mut commands: Commands,
-    session: Res<Session<GgrsConfig>>,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
-) {
+pub fn startup_system(mut commands: Commands) {
     let num_players = 2;
     log::debug!("Spawning camera");
     commands.spawn(Camera2dBundle::default());
     log::debug!("Spawning fighters");
-    commands.spawn_batch(vec![
-        (
+    commands
+        .spawn((
             Fighter {},
             Allegiance { handle: 0 },
             Intent(IntentKind::Neutral),
@@ -141,8 +137,10 @@ pub fn startup_system(
                 },
                 ..default()
             },
-        ),
-        (
+        ))
+        .add_rollback();
+    commands
+        .spawn((
             Fighter {},
             Allegiance { handle: 1 },
             Intent(IntentKind::Neutral),
@@ -166,6 +164,6 @@ pub fn startup_system(
                 },
                 ..default()
             },
-        ),
-    ]);
+        ))
+        .add_rollback();
 }

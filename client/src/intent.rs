@@ -46,9 +46,10 @@ fn mk_command(input: CombinedInput) -> Intent {
 }
 
 pub fn set_intent_system(
-    mut query: Query<(&mut Intent, &Allegiance), With<Rollback>>,
     keyboard_input: Res<PlayerInputs<GgrsConfig>>,
+    mut query: Query<(&mut Intent, &Allegiance)>,
 ) {
+    log::debug!("Setting intent");
     for (mut intent, allegiance) in query.iter_mut() {
         *intent = mk_command(keyboard_input[allegiance.handle].0);
         log::debug!("Player {:?} has intent {:?}", allegiance, intent);

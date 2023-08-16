@@ -29,6 +29,9 @@ pub struct Stocks {
     pub count: u8,
 }
 
+// Rather than use a floating-point transform system,
+// the game logic uses integers. This is translated to
+// floats for the graphics system.
 #[derive(Component, Reflect, Default)]
 pub struct Position {
     pub x: i32,
@@ -72,6 +75,28 @@ pub fn acceleration_system(mut query: Query<(&mut Velocity, &Acceleration), With
         velocity.y += acceleration.y;
     }
 }
+
+// The Command is not the final say
+// on the behaviour of the character.
+// For example, a character who is falling
+// and actives RightTilt will do a FAir or BAir
+// depending on their orientation.
+pub enum IntentKind {
+    GoRight,
+    GoLeft,
+    Jab,
+    RightTilt,
+    LeftTilt,
+    DownTilt,
+    Jump,
+    Neutral,
+    Crouch,
+    CrawlRight,
+    CrawlLeft,
+}
+
+#[derive(Component)]
+pub struct Intent(pub IntentKind);
 
 pub fn startup_system(
     mut commands: Commands,

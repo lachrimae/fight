@@ -1,55 +1,50 @@
 use bevy::log;
 use bevy::prelude::*;
-use std::option::Option;
 
-mod input;
-
-#[derive(Component)]
+#[derive(Component, Reflect, Default)]
 pub struct Fighter {}
 
-#[derive(Component)]
-pub struct Collides {}
-
-#[derive(Component)]
+#[derive(Component, Reflect, Default)]
 pub struct DoesDamage {}
 
-#[derive(Component)]
+#[derive(Component, Reflect, Default)]
 pub struct Environment {}
 
-#[derive(Component)]
-pub struct CollisionCirc {
-    pub radius: i32,
+#[derive(Component, Reflect, Default)]
+pub struct CollisionRect {
+    pub width: i32,
+    pub height: i32,
 }
 
-#[derive(Component)]
+#[derive(Component, Reflect, Default)]
 pub struct Allegiance {
     pub player_id: u8,
 }
 
-#[derive(Component)]
+#[derive(Component, Reflect, Default)]
 pub struct Stocks {
     pub count: u8,
 }
 
-#[derive(Component)]
+#[derive(Component, Reflect, Default)]
 pub struct Position {
     pub x: i32,
     pub y: i32,
 }
 
-#[derive(Component)]
+#[derive(Component, Reflect, Default)]
 pub struct Moving {}
 
-#[derive(Component)]
+#[derive(Component, Reflect, Default)]
 pub struct Velocity {
     pub x: i32,
     pub y: i32,
 }
 
-#[derive(Component)]
+#[derive(Component, Reflect, Default)]
 pub struct Accelerating {}
 
-#[derive(Component)]
+#[derive(Component, Reflect, Default)]
 pub struct Acceleration {
     pub x: i32,
     pub y: i32,
@@ -81,7 +76,10 @@ pub fn startup_system(mut commands: Commands) {
             Velocity { x: 0, y: 0 },
             Acceleration { x: 0, y: 0 },
             Stocks { count: 4 },
-            Collides {},
+            CollisionRect {
+                width: 80,
+                height: 80,
+            },
         ),
         (
             Fighter {},
@@ -90,9 +88,10 @@ pub fn startup_system(mut commands: Commands) {
             Velocity { x: 0, y: 0 },
             Acceleration { x: 0, y: 0 },
             Stocks { count: 4 },
-            Collides {},
+            CollisionRect {
+                width: 80,
+                height: 80,
+            },
         ),
     ]);
 }
-
-pub const FIXED_TIMESTEP: f32 = 0.5;

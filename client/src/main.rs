@@ -22,7 +22,7 @@ struct NetworkStatsTimer(Timer);
 struct GgrsConfig;
 
 impl ggrs::Config for GgrsConfig {
-    type Input = u8;
+    type Input = CombinedInput;
     type State = u8;
     type Address = SocketAddr;
 }

@@ -2,6 +2,7 @@ use bevy::input::keyboard::KeyCode;
 use bevy::input::ButtonState;
 use bevy::log;
 use bevy::prelude::*;
+use bytemuck::{Pod, Zeroable};
 use ggrs::PlayerHandle;
 use std::collections::HashMap;
 
@@ -23,7 +24,7 @@ const fn shift_flag(input: DiscreteInput) -> u8 {
 
 // TODO: Make this more complicated when there are multiple local players
 #[derive(Resource, Debug, Clone, Copy, PartialEq, Eq, Pod, Zeroable)]
-#[repr(u8)]
+#[repr(C)]
 pub struct CombinedInput(u8);
 
 #[derive(Debug, Resource)]
@@ -34,7 +35,7 @@ impl CombinedInput {
         CombinedInput(0)
     }
 
-    pub const fn set(&mut self, button: DiscreteInput, state: ButtonState) {
+    pub const fn set(mut self, button: DiscreteInput, state: ButtonState) {
         let flag = shift_flag(button);
         match state {
             ButtonState::Pressed => self.0 |= flag,

@@ -1,5 +1,8 @@
+use crate::types::*;
 use bevy::log;
 use bevy::prelude::*;
+use bevy_ggrs::Session;
+use ggrs::PlayerHandle;
 
 #[derive(Component, Reflect, Default)]
 pub struct Fighter {}
@@ -18,7 +21,7 @@ pub struct CollisionRect {
 
 #[derive(Component, Reflect, Default)]
 pub struct Allegiance {
-    pub player_id: u8,
+    pub handle: PlayerHandle,
 }
 
 #[derive(Component, Reflect, Default)]
@@ -66,12 +69,18 @@ pub fn acceleration_system(mut query: Query<(&mut Velocity, &Acceleration), With
     }
 }
 
-pub fn startup_system(mut commands: Commands) {
+pub fn startup_system(
+    mut commands: Commands,
+    session: Res<Session<GgrsConfig>>,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+) {
+    let num_players = 2;
     log::debug!("Spawning fighters");
     commands.spawn_batch(vec![
         (
             Fighter {},
-            Allegiance { player_id: 0 },
+            Allegiance { handle: 0 },
             Position { x: -50, y: 0 },
             Velocity { x: 0, y: 0 },
             Acceleration { x: 0, y: 0 },
@@ -80,10 +89,15 @@ pub fn startup_system(mut commands: Commands) {
                 width: 80,
                 height: 80,
             },
+            PbrBundle {
+                mesh: meshes.add(Mesh::from(shape::Cube { size: 80. })),
+                material: materials.add(Color::rgb(0.9, 0.2, 0.2).into()),
+                ..default()
+            },
         ),
         (
             Fighter {},
-            Allegiance { player_id: 1 },
+            Allegiance { handle: 1 },
             Position { x: 50, y: 50 },
             Velocity { x: 0, y: 0 },
             Acceleration { x: 0, y: 0 },
@@ -91,6 +105,11 @@ pub fn startup_system(mut commands: Commands) {
             CollisionRect {
                 width: 80,
                 height: 80,
+            },
+            PbrBundle {
+                mesh: meshes.add(Mesh::from(shape::Cube { size: 80. })),
+                material: materials.add(Color::rgb(0., 0.35, 0.8).into()),
+                ..default()
             },
         ),
     ]);

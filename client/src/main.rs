@@ -18,17 +18,8 @@ mod world;
 #[derive(Resource)]
 struct NetworkStatsTimer(Timer);
 
-#[derive(Debug)]
-struct GgrsConfig;
-
-impl ggrs::Config for GgrsConfig {
-    type Input = CombinedInput;
-    type State = u8;
-    type Address = SocketAddr;
-}
-
 use crate::input::*;
-
+use crate::types::*;
 use crate::world::*;
 
 fn main() {

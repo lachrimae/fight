@@ -28,7 +28,7 @@ const fn shift_flag(input: DiscreteInput) -> u8 {
 pub struct CombinedInput(u8);
 
 #[derive(Debug, Resource)]
-pub struct LocalInputs(pub HashMap<PlayerId, CombinedInput>);
+pub struct LocalInputs(pub HashMap<PlayerHandle, CombinedInput>);
 
 impl CombinedInput {
     pub fn new() -> Self {

@@ -6,6 +6,7 @@ edition = "2021"
 [dependencies]
 bevy = { version = "0.11.1", features = ["dynamic_linking"] }
 bevy_ggrs = "0.13.0"
+bytemuck = "1.13.1"
 ggrs = "0.9.4"
 serde = "1.0.183"
 

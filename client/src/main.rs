@@ -32,12 +32,6 @@ use crate::types::*;
 use crate::world::*;
 
 fn main() {
-    let local_inputs = {
-        let mut inputs: HashMap<PlayerId, CombinedInput> = HashMap::new();
-        inputs.insert(PlayerId(0), CombinedInput::new());
-        LocalInputs(inputs)
-    };
-
     let mut sess_build = SessionBuilder::<GgrsConfig>::new()
         .with_num_players(2)
         .with_desync_detection_mode(ggrs::DesyncDetection::On { interval: 10 })
@@ -68,6 +62,7 @@ fn main() {
     app.add_ggrs_plugin(
         GgrsPlugin::<GgrsConfig>::new()
             .with_update_frequency(FPS)
+            .with_input_system(input)
             .register_rollback_component::<Position>()
             .register_rollback_component::<Velocity>()
             .register_rollback_component::<Acceleration>()
@@ -81,9 +76,10 @@ fn main() {
             .register_rollback_component::<Stocks>(),
     )
     .add_systems(Startup, startup_system)
-    .add_systems(Update, register_inputs)
-    .add_systems(GgrsSchedule, (movement_system, acceleration_system).chain())
-    .insert_resource(local_inputs)
+    .add_systems(
+        GgrsSchedule,
+        (movement_system, acceleration_system.after(movement_system)),
+    )
     .insert_resource(Session::P2P(sess))
     .insert_resource(NetworkStatsTimer(Timer::from_seconds(
         2.0,

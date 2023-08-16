@@ -5,7 +5,7 @@ use std::option::Option;
 use std::vec::Vec;
 
 use crate::db::common::*;
-use crate::db::game::{Game, GameState};
+use crate::db::game::{Game};
 use crate::db::user::User;
 
 #[derive(Clone, Copy, Debug, Deserialize, Serialize)]

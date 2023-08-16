@@ -1,4 +1,4 @@
-use lapin::{options::*, types::FieldTable, Connection, ConnectionProperties};
+
 use serde::Deserialize;
 use tokio_postgres::NoTls;
 

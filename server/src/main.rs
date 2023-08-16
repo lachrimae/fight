@@ -4,7 +4,7 @@ use axum::{
     Json,
 };
 use serde::{Deserialize, Serialize};
-use std::net::SocketAddr;
+
 use std::sync::Arc;
 
 mod app;

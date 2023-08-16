@@ -1,7 +1,7 @@
 use axum::{extract, extract::State, http::StatusCode, Json};
 use serde::{Deserialize, Serialize};
 use std::option::Option;
-use std::str::FromStr;
+
 use std::sync::Arc;
 
 use crate::app::App;

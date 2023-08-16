@@ -1,7 +1,7 @@
 use crate::app::App;
 use crate::db::common::Uuid;
 use crate::db::game::Game;
-use crate::db::user::User;
+
 use axum::{extract::State, http::StatusCode, Json};
 use std::str::FromStr;
 use std::sync::Arc;

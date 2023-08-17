@@ -1,0 +1,12 @@
+jump:
+  up_vel: 10
+jab:
+  damage: 5
+  startlag: 2
+  duration: 13
+  endlag: 3
+nair:
+  damage: 10
+  startlag: 1
+  duration: 40
+  endlag: 0

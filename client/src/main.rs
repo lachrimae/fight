@@ -60,7 +60,7 @@ fn main() {
                 ..default()
             }),
             FmodPlugin {
-                audio_banks_directory: "./client/assets/Build/Desktop",
+                audio_banks_directory: "./fmod/Build/Desktop",
             },
         ))
         .add_ggrs_plugin(

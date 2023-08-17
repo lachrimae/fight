@@ -14,7 +14,7 @@ fn modify_neutral(last_o: Orientation, last_a: Action) -> (Orientation, Action) 
     (last_o, a)
 }
 
-fn modify_go_right(last_o: Orientation, last_a: Action) -> (Orientation, Action) {
+fn modify_go_right(_last_o: Orientation, last_a: Action) -> (Orientation, Action) {
     let a = match last_a {
         Action::Standing => Action::Walking,
         Action::Falling(n) => Action::Falling(n),
@@ -25,7 +25,7 @@ fn modify_go_right(last_o: Orientation, last_a: Action) -> (Orientation, Action)
     (Orientation::Right, a)
 }
 
-fn modify_go_left(last_o: Orientation, last_a: Action) -> (Orientation, Action) {
+fn modify_go_left(_last_o: Orientation, last_a: Action) -> (Orientation, Action) {
     let a = match last_a {
         Action::Standing => Action::Walking,
         Action::Falling(n) => Action::Falling(n),
@@ -61,13 +61,13 @@ pub fn set_stance_system(mut query: Query<(&mut FightingStance, &Intent)>) {
     log::debug!("Setting stances");
     for (mut stance, intent) in query.iter_mut() {
         let mut unchanged = true;
-        if (stance.countdown >= 0) {
+        if stance.countdown >= 0 {
             stance.countdown -= 1;
             log::trace!("Counting up stance");
         } else if let Some((new_o, new_a)) = new_stance(stance.orientation, stance.action, intent) {
             unchanged = false;
-            (*stance).orientation = new_o;
-            (*stance).action = new_a;
+            stance.orientation = new_o;
+            stance.action = new_a;
             log::debug!("Switching to new stance {:?}", *stance);
         }
         if unchanged {

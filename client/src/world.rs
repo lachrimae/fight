@@ -2,7 +2,7 @@ use bevy::log;
 use bevy::prelude::*;
 use bevy_ggrs::AddRollbackCommandExtension;
 
-use ggrs::PlayerHandle;
+
 use std::default::Default;
 
 use crate::types::*;

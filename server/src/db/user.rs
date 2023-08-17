@@ -38,6 +38,6 @@ mod tests {
     async fn insert_and_get() {
         let app = &crate::test::APP;
         let client = app.db_pool.get().await.unwrap();
-        let user = super::User::new(&client).await;
+        let _user = super::User::new(&client).await;
     }
 }

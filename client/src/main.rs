@@ -6,8 +6,8 @@ use bevy::window::WindowResolution;
 use bevy_ggrs::{GgrsAppExtension, GgrsPlugin, GgrsSchedule, Session};
 use ggrs::{PlayerType, SessionBuilder, UdpNonBlockingSocket};
 
-use std::net::SocketAddr;
-use std::str::FromStr;
+
+
 
 const FPS: usize = 60;
 

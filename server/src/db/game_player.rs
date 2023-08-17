@@ -106,7 +106,7 @@ mod tests {
     #[tokio::test]
     async fn test_second_player_joins() {
         let app = &crate::test::APP;
-        let mut client = app.db_pool.get().await.unwrap();
+        let client = app.db_pool.get().await.unwrap();
         let player1 = User::new(&client).await;
         let player2 = User::new(&client).await;
         let game = Game::new(&client, &player1.id).await;
@@ -120,7 +120,7 @@ mod tests {
         assert_eq!(players.len(), 2);
         assert_eq!(
             players.iter().map(|&p| p.id).collect::<Vec<_>>().sort(),
-            vec![player1.id, player2.id].sort()
+            [player1.id, player2.id].sort()
         );
     }
 

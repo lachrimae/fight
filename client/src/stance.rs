@@ -36,6 +36,17 @@ fn modify_go_left(_last_o: Orientation, last_a: Action) -> (Orientation, Action)
     (Orientation::Left, a)
 }
 
+fn modify_jab(last_o: Orientation, last_a: Action) -> (Orientation, Action) {
+    let a = match last_a {
+        Action::Standing => Action::Jabbing,
+        Action::Falling(n) => Action::NAiring(n),
+        Action::Walking => Action::Jabbing,
+        Action::Jabbing => Action::Jabbing,
+        Action::NAiring(n) => Action::NAiring(n),
+    };
+    (last_o, a)
+}
+
 fn new_stance(
     last_o: Orientation,
     last_a: Action,
@@ -45,6 +56,7 @@ fn new_stance(
         IntentKind::Neutral => modify_neutral(last_o, last_a),
         IntentKind::GoRight => modify_go_right(last_o, last_a),
         IntentKind::GoLeft => modify_go_left(last_o, last_a),
+        IntentKind::Jab => modify_jab(last_o, last_a),
         _ => {
             unimplemented!()
         }

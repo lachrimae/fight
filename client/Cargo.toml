@@ -5,6 +5,7 @@ edition = "2021"
 
 [dependencies]
 bevy = { version = "0.11.1", features = ["dynamic_linking"] }
+bevy_asset_loader = "0.17.0"
 bevy_ggrs = "0.13.0"
 bytemuck = "1.13.1"
 ggrs = "0.9.4"

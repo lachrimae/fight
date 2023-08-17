@@ -3,11 +3,9 @@
 use bevy::log;
 use bevy::prelude::*;
 use bevy::window::WindowResolution;
+use bevy_asset_loader::prelude::*;
 use bevy_ggrs::{GgrsAppExtension, GgrsPlugin, GgrsSchedule, Session};
 use ggrs::{PlayerType, SessionBuilder, UdpNonBlockingSocket};
-
-
-
 
 const FPS: usize = 60;
 
@@ -19,8 +17,12 @@ mod stance;
 mod types;
 mod world;
 
-#[derive(Resource)]
-struct NetworkStatsTimer(Timer);
+#[derive(States, Clone, Eq, PartialEq, Debug, Hash, Default)]
+enum GameState {
+    #[default]
+    AssetLoading,
+    InGame,
+}
 
 fn main() {
     let mut sess_build = SessionBuilder::<types::GgrsConfig>::new()
@@ -42,42 +44,50 @@ fn main() {
 
     let mut app = App::new();
     log::info!("Configuring Bevy app");
-    app.add_plugins(DefaultPlugins.set(WindowPlugin {
-        primary_window: Some(Window {
-            resolution: WindowResolution::new(720., 720.),
-            title: "Fight!".to_owned(),
+    app.add_state::<GameState>()
+        .add_loading_state(
+            LoadingState::new(GameState::AssetLoading).continue_to_state(GameState::InGame),
+        )
+        .add_collection_to_loading_state::<_, world::ImageAssets>(GameState::AssetLoading)
+        .add_plugins(DefaultPlugins.set(WindowPlugin {
+            primary_window: Some(Window {
+                resolution: WindowResolution::new(720., 720.),
+                title: "Fight!".to_owned(),
+                ..default()
+            }),
             ..default()
-        }),
-        ..default()
-    }))
-    .add_ggrs_plugin(
-        GgrsPlugin::<types::GgrsConfig>::new()
-            .with_update_frequency(FPS)
-            .with_input_system(input::input_system)
-            .register_rollback_component::<world::Intent>()
-            .register_rollback_component::<world::Allegiance>()
-            .register_rollback_component::<world::FightingStance>()
-            .register_rollback_component::<world::Velocity>()
-            .register_rollback_component::<world::Position>()
-            .register_rollback_component::<world::Acceleration>()
-            .register_rollback_component::<world::Accelerating>()
-            .register_rollback_component::<world::Moving>(),
-    )
-    .insert_resource(ClearColor(Color::rgb(0.9, 0.9, 0.9)))
-    .insert_resource(types::PlayerId(0))
-    // .insert_resource(types::PlayerId(1))
-    .insert_resource(Session::P2P(sess))
-    .add_systems(Startup, world::startup_system)
-    .add_systems(
-        GgrsSchedule,
-        (
-            intent::set_intent_system,
-            stance::set_stance_system.after(intent::set_intent_system),
-            physics::set_physical_props_system.after(stance::set_stance_system),
-            physics::movement_system.after(physics::set_physical_props_system),
-            physics::acceleration_system.after(physics::movement_system),
-        ),
-    )
-    .add_systems(Update, graphics::update_graphics_system)
-    .run();
+        }))
+        .add_ggrs_plugin(
+            GgrsPlugin::<types::GgrsConfig>::new()
+                .with_update_frequency(FPS)
+                .with_input_system(input::input_system)
+                .register_rollback_component::<world::Intent>()
+                .register_rollback_component::<world::Allegiance>()
+                .register_rollback_component::<world::FightingStance>()
+                .register_rollback_component::<world::Velocity>()
+                .register_rollback_component::<world::Position>()
+                .register_rollback_component::<world::Acceleration>()
+                .register_rollback_component::<world::Accelerating>()
+                .register_rollback_component::<world::Moving>(),
+        )
+        .insert_resource(ClearColor(Color::rgb(0.9, 0.9, 0.9)))
+        .insert_resource(types::PlayerId(0))
+        // .insert_resource(types::PlayerId(1))
+        .insert_resource(Session::P2P(sess))
+        .add_systems(OnEnter(GameState::InGame), world::startup_system)
+        .add_systems(
+            GgrsSchedule,
+            (
+                intent::set_intent_system,
+                stance::set_stance_system.after(intent::set_intent_system),
+                physics::set_physical_props_system.after(stance::set_stance_system),
+                physics::movement_system.after(physics::set_physical_props_system),
+                physics::acceleration_system.after(physics::movement_system),
+            ),
+        )
+        .add_systems(
+            Update,
+            graphics::update_graphics_system.run_if(in_state(GameState::InGame)),
+        )
+        .run();
 }

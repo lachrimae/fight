@@ -1,11 +1,21 @@
 use bevy::log;
 use bevy::prelude::*;
+use bevy_asset_loader::prelude::*;
 use bevy_ggrs::AddRollbackCommandExtension;
-
 
 use std::default::Default;
 
 use crate::types::*;
+
+#[derive(AssetCollection, Resource)]
+pub struct ImageAssets {
+    #[asset(path = "derpy-stand.png")]
+    pub derpy_stand: Handle<Image>,
+    #[asset(path = "derpy-walk.png")]
+    pub derpy_walk: Handle<Image>,
+    #[asset(path = "derpy-jab.png")]
+    pub derpy_jab: Handle<Image>,
+}
 
 #[derive(Component, Reflect, Default)]
 pub struct Fighter {}
@@ -125,8 +135,10 @@ pub struct FightingStance {
     pub countup: u8,
 }
 
-pub fn startup_system(mut commands: Commands) {
-    let _num_players = 2;
+pub fn startup_system(mut commands: Commands, asset_server: Res<AssetServer>) {
+    log::debug!("Loading sprites");
+    let stand_texture = asset_server.load("derpy-stand.png");
+
     log::debug!("Spawning camera");
     commands.spawn(Camera2dBundle::default());
     log::debug!("Spawning fighters");
@@ -149,15 +161,7 @@ pub fn startup_system(mut commands: Commands) {
                 height: 80,
             },
             SpriteBundle {
-                transform: Transform {
-                    translation: Vec3::new(-50., 0., 0.),
-                    scale: Vec3::new(20., 20., 20.),
-                    ..default()
-                },
-                sprite: Sprite {
-                    color: Color::rgb(1., 0.47, 0.),
-                    ..default()
-                },
+                texture: stand_texture,
                 ..default()
             },
         ))

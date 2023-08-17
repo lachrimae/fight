@@ -28,8 +28,15 @@ pub struct Environment {}
 
 #[derive(Component, Reflect, Default)]
 pub struct CollisionRect {
-    pub width: i32,
-    pub height: i32,
+    pub width: u32,
+    pub height: u32,
+}
+
+#[derive(Component)]
+pub struct Platform {
+    pub x: i32,
+    pub y: i32,
+    pub width: u32,
 }
 
 #[derive(Component, Reflect, Default, Debug)]
@@ -142,6 +149,13 @@ pub fn startup_system(mut commands: Commands, asset_server: Res<AssetServer>) {
     log::debug!("Spawning camera");
     commands.spawn(Camera2dBundle::default());
     log::debug!("Spawning fighters");
+    commands.spawn(
+        (Platform {
+            x: -50,
+            y: 0,
+            width: 100,
+        }),
+    );
     commands
         .spawn((
             Fighter {},

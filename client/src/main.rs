@@ -4,6 +4,7 @@ use bevy::log;
 use bevy::prelude::*;
 use bevy::window::WindowResolution;
 use bevy_asset_loader::prelude::*;
+use bevy_fmod::FmodPlugin;
 use bevy_ggrs::{GgrsAppExtension, GgrsPlugin, GgrsSchedule, Session};
 use ggrs::{PlayerType, SessionBuilder, UdpNonBlockingSocket};
 
@@ -49,14 +50,19 @@ fn main() {
             LoadingState::new(GameState::AssetLoading).continue_to_state(GameState::InGame),
         )
         .add_collection_to_loading_state::<_, world::ImageAssets>(GameState::AssetLoading)
-        .add_plugins(DefaultPlugins.set(WindowPlugin {
-            primary_window: Some(Window {
-                resolution: WindowResolution::new(720., 720.),
-                title: "Fight!".to_owned(),
+        .add_plugins((
+            DefaultPlugins.set(WindowPlugin {
+                primary_window: Some(Window {
+                    resolution: WindowResolution::new(720., 720.),
+                    title: "Fight!".to_owned(),
+                    ..default()
+                }),
                 ..default()
             }),
-            ..default()
-        }))
+            FmodPlugin {
+                audio_banks_directory: "./client/assets/Build/Desktop",
+            },
+        ))
         .add_ggrs_plugin(
             GgrsPlugin::<types::GgrsConfig>::new()
                 .with_update_frequency(FPS)

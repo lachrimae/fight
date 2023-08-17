@@ -6,8 +6,6 @@ use bytemuck::{Pod, Zeroable};
 use ggrs::PlayerHandle;
 use std::collections::HashMap;
 
-
-
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
 pub enum DiscreteInput {
@@ -18,7 +16,8 @@ pub enum DiscreteInput {
     Down,
 }
 
-const fn shift_flag(input: DiscreteInput) -> u8 {
+fn shift_flag(input: DiscreteInput) -> u8 {
+    log::trace!("input::shift_flag: shifting 1 left by {:?}", input as u8);
     1 << (input as u8)
 }
 
@@ -43,8 +42,8 @@ impl CombinedInput {
         };
     }
 
-    pub const fn is_pressed(&self, button: DiscreteInput) -> bool {
-        self.0 << shift_flag(button) != 0
+    pub fn is_pressed(&self, button: DiscreteInput) -> bool {
+        self.0 & shift_flag(button) != 0
     }
 }
 

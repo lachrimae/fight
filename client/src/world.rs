@@ -1,10 +1,11 @@
-
 use bevy::log;
 use bevy::prelude::*;
 use bevy_ggrs::AddRollbackCommandExtension;
 
 use ggrs::PlayerHandle;
 use std::default::Default;
+
+use crate::types::*;
 
 #[derive(Component, Reflect, Default)]
 pub struct Fighter {}
@@ -23,7 +24,7 @@ pub struct CollisionRect {
 
 #[derive(Component, Reflect, Default, Debug)]
 pub struct Allegiance {
-    pub handle: PlayerHandle,
+    pub handle: PlayerId,
 }
 
 #[derive(Component, Reflect, Default)]
@@ -34,7 +35,7 @@ pub struct Stocks {
 // Rather than use a floating-point transform system,
 // the game logic uses integers. This is translated to
 // floats for the graphics system.
-#[derive(Component, Reflect, Default)]
+#[derive(Debug, Component, Reflect, Default)]
 pub struct Position {
     pub x: i32,
     pub y: i32,
@@ -47,7 +48,7 @@ fn posn_to_translation(p: Position) -> Vec2 {
 #[derive(Component, Reflect, Default)]
 pub struct Moving {}
 
-#[derive(Component, Reflect, Default)]
+#[derive(Debug, Component, Reflect, Default)]
 pub struct Velocity {
     pub x: i32,
     pub y: i32,
@@ -56,26 +57,10 @@ pub struct Velocity {
 #[derive(Component, Reflect, Default)]
 pub struct Accelerating {}
 
-#[derive(Component, Reflect, Default)]
+#[derive(Debug, Component, Reflect, Default)]
 pub struct Acceleration {
     pub x: i32,
     pub y: i32,
-}
-
-pub fn movement_system(mut query: Query<(&mut Position, &Velocity), With<Moving>>) {
-    log::debug!("movement system beginning");
-    for (mut position, velocity) in &mut query {
-        position.x += velocity.x;
-        position.y += velocity.y;
-    }
-}
-
-pub fn acceleration_system(mut query: Query<(&mut Velocity, &Acceleration), With<Accelerating>>) {
-    log::debug!("acceleration system beginning");
-    for (mut velocity, acceleration) in &mut query {
-        velocity.x += acceleration.x;
-        velocity.y += acceleration.y;
-    }
 }
 
 // The Command is not the final say
@@ -83,9 +68,10 @@ pub fn acceleration_system(mut query: Query<(&mut Velocity, &Acceleration), With
 // For example, a character who is falling
 // and actives RightTilt will do a FAir or BAir
 // depending on their orientation.
-#[derive(Debug, Reflect)]
-#[derive(Default)]
+#[derive(Debug, Reflect, Default)]
 pub enum IntentKind {
+    #[default]
+    Neutral,
     GoRight,
     GoLeft,
     Jab,
@@ -93,17 +79,51 @@ pub enum IntentKind {
     LeftTilt,
     DownTilt,
     Jump,
-    #[default]
-    Neutral,
     Crouch,
     CrawlRight,
     CrawlLeft,
 }
 
-
-
 #[derive(Component, Default, Reflect, Debug)]
 pub struct Intent(pub IntentKind);
+
+#[derive(PartialEq, Eq, Copy, Clone, Debug, Reflect, Default)]
+pub enum Orientation {
+    Left,
+    #[default]
+    Right,
+}
+
+#[derive(PartialEq, Eq, Copy, Clone, Debug, Reflect, Default)]
+pub struct Jumps(pub u8);
+
+#[derive(PartialEq, Eq, Copy, Clone, Debug, Reflect, Default)]
+pub enum Action {
+    #[default]
+    Standing,
+    Falling(Jumps),
+    Walking,
+    Jabbing,
+    NAiring(Jumps),
+    //    FAiring,
+    //    BAiring,
+    //    UpAiring,
+    //    DAiring,
+    //    FTilting,
+    //    UpTilting,
+    //    DTilting,
+    //    Jabbing,
+    //    Crouching,
+    //    Crawling,
+}
+
+#[derive(Component, Default, Reflect, Debug)]
+pub struct FightingStance {
+    pub orientation: Orientation,
+    pub action: Action,
+    pub countdown: i8,
+    pub countup: u8,
+}
 
 pub fn startup_system(mut commands: Commands) {
     let _num_players = 2;
@@ -113,11 +133,16 @@ pub fn startup_system(mut commands: Commands) {
     commands
         .spawn((
             Fighter {},
-            Allegiance { handle: 0 },
+            Allegiance {
+                handle: PlayerId(0),
+            },
             Intent(IntentKind::Neutral),
-            Position { x: -50, y: 0 },
+            FightingStance::default(),
+            Position { x: 0, y: 0 },
             Velocity { x: 0, y: 0 },
             Acceleration { x: 0, y: 0 },
+            Accelerating {},
+            Moving {},
             Stocks { count: 4 },
             CollisionRect {
                 width: 80,
@@ -131,33 +156,6 @@ pub fn startup_system(mut commands: Commands) {
                 },
                 sprite: Sprite {
                     color: Color::rgb(1., 0.47, 0.),
-                    ..default()
-                },
-                ..default()
-            },
-        ))
-        .add_rollback();
-    commands
-        .spawn((
-            Fighter {},
-            Allegiance { handle: 1 },
-            Intent(IntentKind::Neutral),
-            Position { x: 50, y: 50 },
-            Velocity { x: 0, y: 0 },
-            Acceleration { x: 0, y: 0 },
-            Stocks { count: 4 },
-            CollisionRect {
-                width: 80,
-                height: 80,
-            },
-            SpriteBundle {
-                transform: Transform {
-                    translation: Vec3::new(50., 0., 0.),
-                    scale: Vec3::new(20., 20., 20.),
-                    ..default()
-                },
-                sprite: Sprite {
-                    color: Color::rgb(0., 0.47, 1.),
                     ..default()
                 },
                 ..default()

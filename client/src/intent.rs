@@ -1,10 +1,9 @@
-
 use crate::input::{CombinedInput, DiscreteInput};
 use crate::types::*;
 use crate::world::{Allegiance, Intent, IntentKind};
 use bevy::log;
 use bevy::prelude::*;
-use bevy_ggrs::{PlayerInputs};
+use bevy_ggrs::PlayerInputs;
 
 fn mk_command(input: CombinedInput) -> Intent {
     let inner = {
@@ -49,9 +48,9 @@ pub fn set_intent_system(
     keyboard_input: Res<PlayerInputs<GgrsConfig>>,
     mut query: Query<(&mut Intent, &Allegiance)>,
 ) {
-    log::debug!("Setting intent");
+    log::debug!("Setting intents");
     for (mut intent, allegiance) in query.iter_mut() {
-        *intent = mk_command(keyboard_input[allegiance.handle].0);
+        *intent = mk_command(keyboard_input[allegiance.handle.0].0);
         log::debug!("Player {:?} has intent {:?}", allegiance, intent);
     }
 }

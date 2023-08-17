@@ -1,8 +1,12 @@
 use crate::input::CombinedInput;
+use bevy::prelude::*;
 use std::net::SocketAddr;
 
 #[derive(Debug)]
 pub struct GgrsConfig;
+
+#[derive(Resource, Reflect, Default, Debug)]
+pub struct PlayerId(pub usize);
 
 impl ggrs::Config for GgrsConfig {
     type Input = CombinedInput;

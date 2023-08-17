@@ -3,6 +3,16 @@ use bevy::log;
 use bevy::prelude::*;
 use std::option::Option;
 
+fn num_countdown_frames(action: Action) -> i8 {
+    match action {
+        Action::Standing => -1,
+        Action::Falling(_) => -1,
+        Action::Walking => -1,
+        Action::Jabbing => 13,
+        Action::NAiring(_) => 40,
+    }
+}
+
 fn modify_neutral(last_o: Orientation, last_a: Action) -> (Orientation, Action) {
     let a = match last_a {
         Action::Standing => Action::Standing,
@@ -86,7 +96,8 @@ pub fn set_stance_system(mut query: Query<(&mut FightingStance, &Intent)>) {
             log::trace!("Counting up stance");
             stance.countup = stance.countup.wrapping_add(1);
         } else {
-            log::trace!("Initializing stance countup");
+            log::trace!("Initializing stance countup and countdown");
+            stance.countdown = num_countdown_frames(stance.action);
             stance.countup = 0;
         }
         log::debug!("Stance is {:?}", stance);

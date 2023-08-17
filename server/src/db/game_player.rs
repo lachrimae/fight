@@ -5,7 +5,7 @@ use std::option::Option;
 use std::vec::Vec;
 
 use crate::db::common::*;
-use crate::db::game::{Game};
+use crate::db::game::Game;
 use crate::db::user::User;
 
 #[derive(Clone, Copy, Debug, Deserialize, Serialize)]
@@ -78,7 +78,7 @@ async fn current_players(client: &Client, game_id: &Uuid<Game>) -> Vec<User> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::db::game::{Game, GameState;
+    use crate::db::game::{Game, GameState};
     use crate::db::user::User;
     #[tokio::test]
     async fn test_try_join_game() {

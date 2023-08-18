@@ -11,6 +11,8 @@ bevy_ggrs = "0.13.0"
 bytemuck = "1.13.1"
 ggrs = "0.9.4"
 serde = "1.0.183"
+strum = "0.25.0"
+strum_macros = "0.25.2"
 
 [profile.dev]
 opt-level = 1

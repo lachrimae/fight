@@ -2,6 +2,7 @@ use bevy::log;
 use bevy::prelude::*;
 use bevy_asset_loader::prelude::*;
 use bevy_ggrs::AddRollbackCommandExtension;
+use bytemuck::{Pod, Zeroable};
 
 use std::default::Default;
 
@@ -48,6 +49,28 @@ pub struct Allegiance {
 pub struct Stocks {
     pub count: u8,
 }
+
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[repr(u16)]
+pub enum InputDiff {
+    NotHeld = 0,
+    Held = 1,
+    Released = 2,
+    Pressed = 3,
+}
+
+pub const fn is_being_pressed(diff: InputDiff) -> bool {
+    match diff {
+        InputDiff::NotHeld => false,
+        InputDiff::Held => true,
+        InputDiff::Pressed => true,
+        InputDiff::Released => false,
+    }
+}
+
+#[derive(Default, Component, Debug, Clone, Copy, PartialEq, Eq, Pod, Zeroable, Reflect)]
+#[repr(C)]
+pub struct CombinedInputDiff(pub u16);
 
 // Rather than use a floating-point transform system,
 // the game logic uses integers. This is translated to
@@ -174,6 +197,7 @@ pub fn startup_system(mut commands: Commands, asset_server: Res<AssetServer>) {
             },
             Intent(IntentKind::Neutral),
             FightingStance::default(),
+            CombinedInputDiff::default(),
             Position { x: 0, y: 40 },
             Velocity { x: 0, y: 0 },
             Acceleration { x: 0, y: 0 },

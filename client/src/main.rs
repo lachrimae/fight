@@ -68,6 +68,7 @@ fn main() {
             GgrsPlugin::<types::GgrsConfig>::new()
                 .with_update_frequency(FPS)
                 .with_input_system(input::input_system)
+                .register_rollback_component::<world::CombinedInputDiff>()
                 .register_rollback_component::<world::Intent>()
                 .register_rollback_component::<world::Allegiance>()
                 .register_rollback_component::<world::FightingStance>()
@@ -85,7 +86,8 @@ fn main() {
         .add_systems(
             GgrsSchedule,
             (
-                intent::set_intent_system,
+                intent::input_diff_system,
+                intent::set_intent_system.after(intent::input_diff_system),
                 stance::set_stance_system.after(intent::set_intent_system),
                 physics::set_physical_props_system.after(stance::set_stance_system),
                 physics::movement_system.after(physics::set_physical_props_system),

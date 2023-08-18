@@ -5,9 +5,10 @@ use bevy::prelude::*;
 use bytemuck::{Pod, Zeroable};
 use ggrs::PlayerHandle;
 use std::collections::HashMap;
+use strum_macros::EnumIter;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u16)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter)]
+#[repr(u8)]
 pub enum DiscreteInput {
     Jump,
     Hit,
@@ -16,46 +17,35 @@ pub enum DiscreteInput {
     Down,
 }
 
-fn is_being_pressed(diff: InputDiff) -> bool {
-    match diff {
-        InputDiff::NotHeld => false,
-        InputDiff::Held => true,
-        InputDiff::Pressed => true,
-        InputDiff::Released => false,
-    }
-}
-
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
-#[repr(u16)]
-pub enum InputDiff {
-    NotHeld = 0,
-    Held = 1,
-    Released = 2,
-    Pressed = 3,
+#[repr(u8)]
+pub enum InputState {
+    NotActivated = 0,
+    Activated = 1,
 }
 
-fn to_input_diff(n: u16) -> InputDiff {
+fn to_input_state(n: u8) -> InputState {
     match n {
-        0 => InputDiff::NotHeld,
-        1 => InputDiff::Held,
-        2 => InputDiff::Released,
-        3 => InputDiff::Pressed,
-        _ => panic!(),
+        0 => InputState::NotActivated,
+        1 => InputState::Activated,
+        _ => panic!("Invalid InputState representation"),
     }
 }
 
-const fn get_shift(input: DiscreteInput) -> u16 {
-    2 * input as u16
+const BITS_PER_INPUT: u8 = 1;
+
+const fn get_shift(input: DiscreteInput) -> u8 {
+    BITS_PER_INPUT * input as u8
 }
 
-const BASE_MASK: u16 = 3;
+const BASE_MASK: u8 = 1;
 
-fn shift_mask(input: DiscreteInput) -> u16 {
+const fn shift_mask(input: DiscreteInput) -> u8 {
     BASE_MASK << get_shift(input)
 }
 
-fn shift_flag(input: DiscreteInput, diff: InputDiff) -> u16 {
-    let flag = diff as u16;
+fn shift_flag(input: DiscreteInput, diff: InputState) -> u8 {
+    let flag = diff as u8;
     let shift = get_shift(input);
     log::trace!("input::shift_flag: shifting {:?} left by {:?}", diff, shift);
     flag << shift
@@ -64,42 +54,28 @@ fn shift_flag(input: DiscreteInput, diff: InputDiff) -> u16 {
 // TODO: Make this more complicated when there are multiple local players
 #[derive(Resource, Debug, Clone, Copy, PartialEq, Eq, Pod, Zeroable)]
 #[repr(C)]
-pub struct CombinedInput(u16);
-
-#[derive(Debug, Resource)]
-pub struct LocalInputs(pub HashMap<PlayerHandle, CombinedInput>);
+pub struct CombinedInput(u8);
 
 impl CombinedInput {
     pub fn new() -> Self {
         CombinedInput(0)
     }
 
-    pub fn get(&self, button: DiscreteInput) -> InputDiff {
+    pub fn get(&self, button: DiscreteInput) -> InputState {
         let shift = get_shift(button);
         let mask = shift_mask(button);
         let flag = (self.0 & mask) >> shift;
-        to_input_diff(flag)
+        to_input_state(flag)
     }
 
     pub fn set(&mut self, button: DiscreteInput, state: ButtonState) {
-        let next_diff = if self.is_being_pressed(button) {
-            match state {
-                ButtonState::Pressed => InputDiff::Held,
-                ButtonState::Released => InputDiff::Released,
-            }
-        } else {
-            match state {
-                ButtonState::Pressed => InputDiff::Pressed,
-                ButtonState::Released => InputDiff::NotHeld,
-            }
+        let next_state = match state {
+            ButtonState::Pressed => InputState::Activated,
+            ButtonState::Released => InputState::NotActivated,
         };
         let mask = shift_mask(button);
-        let flag = shift_flag(button, next_diff);
+        let flag = shift_flag(button, next_state);
         self.0 = (self.0 & !mask) | (flag & mask);
-    }
-
-    pub fn is_being_pressed(&self, button: DiscreteInput) -> bool {
-        is_being_pressed(self.get(button))
     }
 }
 

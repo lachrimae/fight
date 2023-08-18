@@ -2,40 +2,31 @@ use crate::world::*;
 use bevy::log;
 use bevy::prelude::*;
 
+use crate::action;
+
 pub fn set_physical_props_system(
     mut query: Query<(&mut Velocity, &mut Acceleration, &FightingStance)>,
 ) {
     log::debug!("physical props system beginning");
     for (mut vel, mut acc, stance) in query.iter_mut() {
-        match stance.action {
-            Action::Standing => {
-                acc.x = 0;
-                acc.y = 0;
-                vel.x = 0;
-                vel.y = 0;
-            }
-            Action::Falling(_) => {
-                if stance.countup == 0 {
-                    acc.y = -8;
-                    vel.y = 3
+        if action::stops_movement(stance.action) {
+            acc.x = 0;
+            acc.y = 0;
+            vel.x = 0;
+            vel.y = 0;
+        } else if action::is_aerial(stance.action) {
+            acc.y = -8;
+        }
+        if stance.action == Action::Walking {
+            acc.x = 0;
+            match stance.orientation {
+                Orientation::Left => {
+                    vel.x = -3;
+                }
+                Orientation::Right => {
+                    vel.x = 3;
                 }
             }
-            Action::Walking => {
-                acc.x = 0;
-                match stance.orientation {
-                    Orientation::Left => {
-                        vel.x = -3;
-                    }
-                    Orientation::Right => {
-                        vel.x = 3;
-                    }
-                }
-            }
-            Action::Jabbing => {
-                acc.x = 0;
-                acc.y = 0;
-            }
-            Action::NAiring(_) => {}
         }
         log::trace!("velocity is now {:?}", vel);
         log::trace!("acceleration is now {:?}", acc);

@@ -9,12 +9,12 @@ use crate::types::*;
 
 #[derive(AssetCollection, Resource)]
 pub struct ImageAssets {
-    #[asset(path = "derpy-stand.png")]
-    pub derpy_stand: Handle<Image>,
-    #[asset(path = "derpy-walk.png")]
-    pub derpy_walk: Handle<Image>,
-    #[asset(path = "derpy-jab.png")]
-    pub derpy_jab: Handle<Image>,
+    #[asset(path = "postbox-stand.png")]
+    pub postbox_stand: Handle<Image>,
+    #[asset(path = "postbox-walk.png")]
+    pub postbox_walk: Handle<Image>,
+    #[asset(path = "postbox-jab.png")]
+    pub postbox_jab: Handle<Image>,
 }
 
 #[derive(Component, Reflect, Default)]
@@ -144,18 +144,27 @@ pub struct FightingStance {
 
 pub fn startup_system(mut commands: Commands, asset_server: Res<AssetServer>) {
     log::debug!("Loading sprites");
-    let stand_texture = asset_server.load("derpy-stand.png");
+    let stand_texture = asset_server.load("postbox-stand.png");
 
     log::debug!("Spawning camera");
     commands.spawn(Camera2dBundle::default());
     log::debug!("Spawning fighters");
-    commands.spawn(
-        (Platform {
+    commands.spawn((
+        Platform {
             x: -50,
             y: 0,
             width: 100,
-        }),
-    );
+        },
+        SpriteBundle {
+            transform: Transform::from_translation(Vec3::new(-50., 0., 0.)),
+            sprite: Sprite {
+                color: Color::rgb(0., 0., 0.),
+                custom_size: Some(Vec2::new(100., 1.)),
+                ..default()
+            },
+            ..default()
+        },
+    ));
     commands
         .spawn((
             Fighter {},
@@ -164,7 +173,7 @@ pub fn startup_system(mut commands: Commands, asset_server: Res<AssetServer>) {
             },
             Intent(IntentKind::Neutral),
             FightingStance::default(),
-            Position { x: 0, y: 0 },
+            Position { x: 0, y: 20 },
             Velocity { x: 0, y: 0 },
             Acceleration { x: 0, y: 0 },
             Accelerating {},

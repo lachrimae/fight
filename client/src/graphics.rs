@@ -20,10 +20,10 @@ pub fn update_graphics_system(
             Orientation::Left => Quat::from_rotation_y(std::f32::consts::PI),
         };
         *sprite = match stance.action {
-            Action::Standing => images.derpy_stand.clone(),
-            Action::Walking => images.derpy_walk.clone(),
-            Action::Jabbing => images.derpy_jab.clone(),
-            _ => images.derpy_stand.clone(),
+            Action::Standing => images.postbox_stand.clone(),
+            Action::Walking => images.postbox_walk.clone(),
+            Action::Jabbing => images.postbox_jab.clone(),
+            _ => images.postbox_stand.clone(),
         }
     }
 }

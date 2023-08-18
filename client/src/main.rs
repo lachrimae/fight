@@ -10,6 +10,7 @@ use ggrs::{PlayerType, SessionBuilder, UdpNonBlockingSocket};
 
 const FPS: usize = 60;
 
+mod action;
 mod graphics;
 mod input;
 mod intent;

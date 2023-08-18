@@ -67,6 +67,8 @@ fn new_stance(
         IntentKind::GoRight => modify_go_right(last_o, last_a),
         IntentKind::GoLeft => modify_go_left(last_o, last_a),
         IntentKind::Jab => modify_jab(last_o, last_a),
+        IntentKind::LeftTilt => modify_jab(last_o, last_a), // TODO fix
+        IntentKind::RightTilt => modify_jab(last_o, last_a), // TODO fix
         _ => {
             unimplemented!()
         }

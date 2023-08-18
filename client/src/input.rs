@@ -1,9 +1,7 @@
-use crate::types::*;
 use bevy::input::keyboard::KeyCode;
 use bevy::input::ButtonState;
 use bevy::log;
 use bevy::prelude::*;
-use bevy_ggrs::PlayerInputs;
 use bytemuck::{Pod, Zeroable};
 use ggrs::PlayerHandle;
 use std::collections::HashMap;
@@ -11,11 +9,20 @@ use std::collections::HashMap;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u16)]
 pub enum DiscreteInput {
-    Jump = 0,
-    Hit = 1,
-    Left = 2,
-    Right = 3,
-    Down = 4,
+    Jump,
+    Hit,
+    Left,
+    Right,
+    Down,
+}
+
+fn is_being_pressed(diff: InputDiff) -> bool {
+    match diff {
+        InputDiff::NotHeld => false,
+        InputDiff::Held => true,
+        InputDiff::Pressed => true,
+        InputDiff::Released => false,
+    }
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
@@ -28,15 +35,13 @@ pub enum InputDiff {
 }
 
 fn to_input_diff(n: u16) -> InputDiff {
-    let res = match n {
+    match n {
         0 => InputDiff::NotHeld,
         1 => InputDiff::Held,
         2 => InputDiff::Released,
         3 => InputDiff::Pressed,
         _ => panic!(),
-    };
-    log::trace!("input::to_input_diff: Converting {:?} to {:?}", n, res);
-    res
+    }
 }
 
 const fn get_shift(input: DiscreteInput) -> u16 {
@@ -53,14 +58,7 @@ fn shift_flag(input: DiscreteInput, diff: InputDiff) -> u16 {
     let flag = diff as u16;
     let shift = get_shift(input);
     log::trace!("input::shift_flag: shifting {:?} left by {:?}", diff, shift);
-    let res = flag << shift;
-    log::trace!(
-        "input::shift_flag: {:?} at {:?} is represented as {:?}",
-        input,
-        diff,
-        res
-    );
-    res
+    flag << shift
 }
 
 // TODO: Make this more complicated when there are multiple local players
@@ -79,15 +77,7 @@ impl CombinedInput {
     pub fn get(&self, button: DiscreteInput) -> InputDiff {
         let shift = get_shift(button);
         let mask = shift_mask(button);
-        let masked_val = self.0 & mask;
-        let flag = masked_val >> shift;
-        log::trace!(
-            "CombinedInput::get: masking {:?} to get {:?} then shifting right by {:?} to get {:?}",
-            self.0,
-            masked_val,
-            shift,
-            flag
-        );
+        let flag = (self.0 & mask) >> shift;
         to_input_diff(flag)
     }
 
@@ -109,13 +99,7 @@ impl CombinedInput {
     }
 
     pub fn is_being_pressed(&self, button: DiscreteInput) -> bool {
-        let diff = self.get(button);
-        match diff {
-            InputDiff::NotHeld => false,
-            InputDiff::Held => true,
-            InputDiff::Released => false,
-            InputDiff::Pressed => true,
-        }
+        is_being_pressed(self.get(button))
     }
 }
 
@@ -139,9 +123,8 @@ const fn keycode_mapper(keycode: &KeyCode) -> Option<DiscreteInput> {
 }
 
 pub fn input_system(
-    In(handle): In<PlayerHandle>,
+    In(_handle): In<PlayerHandle>,
     keyboard_input: Res<Input<KeyCode>>,
-    formatted_input: Res<PlayerInputs<GgrsConfig>>,
 ) -> CombinedInput {
     log::debug!("Registering inputs");
     let mut input = CombinedInput::new();

@@ -118,7 +118,6 @@ pub struct Jumps(pub u8);
 pub enum Action {
     #[default]
     Standing,
-    Jumping(Jumps),
     Falling(Jumps),
     Walking,
     Jabbing,

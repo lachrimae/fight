@@ -5,7 +5,7 @@ use bevy::prelude::*;
 use crate::action;
 
 // TODO: make this depend on character
-const TERMINAL_VELOCITY: i32 = 20;
+const TERMINAL_VELOCITY: i32 = 8;
 
 pub fn set_physical_props_system(
     mut query: Query<(&mut Velocity, &mut Acceleration, &FightingStance)>,
@@ -30,21 +30,14 @@ pub fn set_physical_props_system(
                     vel.x = 3;
                 }
             }
-        } else if let Action::Jumping(_) = stance.action {
-            log::trace!("Jumping!");
-            vel.y = 12;
-        }
-        // TODO: account for other directions of movement
-        if vel.y.abs() > TERMINAL_VELOCITY {
-            if vel.y < 0 {
-                vel.y = -TERMINAL_VELOCITY;
-            } else {
-                vel.y = TERMINAL_VELOCITY;
-            }
-            acc.y = 0;
         }
         log::trace!("velocity is now {:?}", vel);
         log::trace!("acceleration is now {:?}", acc);
+        // TODO: account for other directions of movement
+        if vel.y.abs() > TERMINAL_VELOCITY {
+            vel.y = -TERMINAL_VELOCITY;
+            acc.y = 0;
+        }
     }
 }
 

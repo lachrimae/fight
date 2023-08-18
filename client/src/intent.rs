@@ -1,4 +1,4 @@
-use crate::input::{CombinedInput, DiscreteInput};
+use crate::input::{CombinedInput, DiscreteInput, InputDiff};
 use crate::types::*;
 use crate::world::{Allegiance, Intent, IntentKind};
 use bevy::log;
@@ -35,7 +35,7 @@ fn mk_command(input: CombinedInput) -> Intent {
             }
         } else if input.is_being_pressed(DiscreteInput::Hit) {
             IntentKind::Jab
-        } else if input.is_being_pressed(DiscreteInput::Jump) {
+        } else if matches!(input.get(DiscreteInput::Jump), InputDiff::Pressed) {
             IntentKind::Jump
         } else {
             IntentKind::Neutral

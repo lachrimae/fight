@@ -4,6 +4,9 @@ use bevy::prelude::*;
 
 use crate::action;
 
+// TODO: make this depend on character
+const TERMINAL_VELOCITY: i32 = 8;
+
 pub fn set_physical_props_system(
     mut query: Query<(&mut Velocity, &mut Acceleration, &FightingStance)>,
 ) {
@@ -15,7 +18,7 @@ pub fn set_physical_props_system(
             vel.x = 0;
             vel.y = 0;
         } else if action::is_aerial(stance.action) {
-            acc.y = -8;
+            acc.y = -1;
         }
         if stance.action == Action::Walking {
             acc.x = 0;
@@ -30,6 +33,11 @@ pub fn set_physical_props_system(
         }
         log::trace!("velocity is now {:?}", vel);
         log::trace!("acceleration is now {:?}", acc);
+        // TODO: account for other directions of movement
+        if vel.y.abs() > TERMINAL_VELOCITY {
+            vel.y = -TERMINAL_VELOCITY;
+            acc.y = 0;
+        }
     }
 }
 

@@ -28,15 +28,15 @@ pub struct Environment {}
 
 #[derive(Component, Reflect, Default)]
 pub struct CollisionRect {
-    pub width: u32,
-    pub height: u32,
+    pub width: i32,
+    pub height: i32,
 }
 
-#[derive(Component)]
+#[derive(Debug, Component)]
 pub struct Platform {
     pub x: i32,
     pub y: i32,
-    pub width: u32,
+    pub width: i32,
 }
 
 #[derive(Component, Reflect, Default, Debug)]
@@ -173,7 +173,7 @@ pub fn startup_system(mut commands: Commands, asset_server: Res<AssetServer>) {
             },
             Intent(IntentKind::Neutral),
             FightingStance::default(),
-            Position { x: 0, y: 20 },
+            Position { x: 0, y: 40 },
             Velocity { x: 0, y: 0 },
             Acceleration { x: 0, y: 0 },
             Accelerating {},

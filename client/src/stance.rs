@@ -1,3 +1,4 @@
+use crate::action;
 use crate::world::*;
 use bevy::log;
 use bevy::prelude::*;
@@ -81,9 +82,34 @@ fn new_stance(
     }
 }
 
-pub fn set_stance_system(mut query: Query<(&mut FightingStance, &Intent)>) {
+const FIGHTER_DIMENSIONS: i32 = 40;
+
+fn fighter_is_in_air(pos: &Position, query: &Query<&Platform>) -> bool {
+    for plat in query.iter() {
+        if pos.x < plat.x + plat.width
+            && pos.x + FIGHTER_DIMENSIONS > plat.x
+            && pos.y < plat.y + 1
+            && pos.y + FIGHTER_DIMENSIONS > plat.y
+        {
+            log::trace!("Character at {:?} standing on platform at {:?}", pos, plat);
+            return false;
+        } else {
+            log::trace!(
+                "Character at {:?} not standing on platform at {:?}",
+                pos,
+                plat
+            );
+        }
+    }
+    true
+}
+
+pub fn set_stance_system(
+    mut fighter_query: Query<(&mut FightingStance, &Position, &Intent)>,
+    platform_query: Query<&Platform>,
+) {
     log::debug!("Setting stances");
-    for (mut stance, intent) in query.iter_mut() {
+    for (mut stance, position, intent) in fighter_query.iter_mut() {
         let mut unchanged = true;
         if stance.countdown >= 0 {
             stance.countdown -= 1;
@@ -101,6 +127,19 @@ pub fn set_stance_system(mut query: Query<(&mut FightingStance, &Intent)>) {
             log::trace!("Initializing stance countup and countdown");
             stance.countdown = num_countdown_frames(stance.action);
             stance.countup = 0;
+        }
+        let should_fall = fighter_is_in_air(position, &platform_query);
+        let is_aerial = action::is_aerial(stance.action);
+        if should_fall && !is_aerial {
+            log::trace!("Character fell!");
+            stance.action = Action::Falling(Jumps(0));
+            stance.countup = 0;
+            stance.countdown = -1;
+        } else if !should_fall && is_aerial {
+            log::trace!("Character landed!");
+            stance.action = Action::Standing;
+            stance.countup = 0;
+            stance.countdown = -1;
         }
         log::debug!("Stance is {:?}", stance);
     }

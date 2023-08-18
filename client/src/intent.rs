@@ -7,12 +7,12 @@ use bevy_ggrs::PlayerInputs;
 
 fn mk_command(input: CombinedInput) -> Intent {
     let inner = {
-        let is_left =
-            input.is_pressed(DiscreteInput::Left) && !input.is_pressed(DiscreteInput::Right);
-        let is_right =
-            input.is_pressed(DiscreteInput::Right) && !input.is_pressed(DiscreteInput::Left);
-        if input.is_pressed(DiscreteInput::Down) {
-            if input.is_pressed(DiscreteInput::Hit) {
+        let is_left = input.is_being_pressed(DiscreteInput::Left)
+            && !input.is_being_pressed(DiscreteInput::Right);
+        let is_right = input.is_being_pressed(DiscreteInput::Right)
+            && !input.is_being_pressed(DiscreteInput::Left);
+        if input.is_being_pressed(DiscreteInput::Down) {
+            if input.is_being_pressed(DiscreteInput::Hit) {
                 IntentKind::DownTilt
             } else if is_right {
                 IntentKind::CrawlRight
@@ -22,20 +22,20 @@ fn mk_command(input: CombinedInput) -> Intent {
                 IntentKind::Crouch
             }
         } else if is_left {
-            if input.is_pressed(DiscreteInput::Hit) {
+            if input.is_being_pressed(DiscreteInput::Hit) {
                 IntentKind::LeftTilt
             } else {
                 IntentKind::GoLeft
             }
         } else if is_right {
-            if input.is_pressed(DiscreteInput::Hit) {
+            if input.is_being_pressed(DiscreteInput::Hit) {
                 IntentKind::RightTilt
             } else {
                 IntentKind::GoRight
             }
-        } else if input.is_pressed(DiscreteInput::Hit) {
+        } else if input.is_being_pressed(DiscreteInput::Hit) {
             IntentKind::Jab
-        } else if input.is_pressed(DiscreteInput::Jump) {
+        } else if input.is_being_pressed(DiscreteInput::Jump) {
             IntentKind::Jump
         } else {
             IntentKind::Neutral

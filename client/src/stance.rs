@@ -29,28 +29,28 @@ fn modify_neutral(last_o: Orientation, last_a: Action) -> (Orientation, Action) 
     (last_o, a)
 }
 
-fn modify_go_right(_last_o: Orientation, last_a: Action) -> (Orientation, Action) {
-    let a = match last_a {
-        Action::Standing => Action::Walking,
-        Action::Jumping(n) => Action::Falling(n),
-        Action::Falling(n) => Action::Falling(n),
-        Action::Walking => Action::Walking,
-        Action::Jabbing => Action::Walking,
-        Action::NAiring(n) => Action::Falling(n),
-    };
-    (Orientation::Right, a)
+fn modify_go_right(last_o: Orientation, last_a: Action) -> (Orientation, Action) {
+    let right = Orientation::Right;
+    match last_a {
+        Action::Standing => (right, Action::Walking),
+        Action::Jumping(n) => (last_o, Action::Falling(n)),
+        Action::Falling(n) => (last_o, Action::Falling(n)),
+        Action::Walking => (right, Action::Walking),
+        Action::Jabbing => (right, Action::Walking),
+        Action::NAiring(n) => (last_o, Action::Falling(n)),
+    }
 }
 
-fn modify_go_left(_last_o: Orientation, last_a: Action) -> (Orientation, Action) {
-    let a = match last_a {
-        Action::Standing => Action::Walking,
-        Action::Jumping(n) => Action::Falling(n),
-        Action::Falling(n) => Action::Falling(n),
-        Action::Walking => Action::Walking,
-        Action::Jabbing => Action::Walking,
-        Action::NAiring(n) => Action::Falling(n),
-    };
-    (Orientation::Left, a)
+fn modify_go_left(last_o: Orientation, last_a: Action) -> (Orientation, Action) {
+    let left = Orientation::Left;
+    match last_a {
+        Action::Standing => (left, Action::Walking),
+        Action::Jumping(n) => (last_o, Action::Falling(n)),
+        Action::Falling(n) => (last_o, Action::Falling(n)),
+        Action::Walking => (left, Action::Walking),
+        Action::Jabbing => (left, Action::Walking),
+        Action::NAiring(n) => (last_o, Action::Falling(n)),
+    }
 }
 
 fn modify_jab(last_o: Orientation, last_a: Action) -> (Orientation, Action) {

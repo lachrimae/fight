@@ -100,6 +100,9 @@ fn new_stance(
         IntentKind::LeftTilt => modify_jab(last_o, last_a), // TODO fix
         IntentKind::RightTilt => modify_jab(last_o, last_a), // TODO fix
         IntentKind::Jump => modify_jump(last_o, last_a),
+        IntentKind::Crouch => modify_neutral(last_o, last_a), // TODO fix
+        IntentKind::CrawlRight => modify_go_right(last_o, last_a),
+        IntentKind::CrawlLeft => modify_go_left(last_o, last_a),
         _ => {
             unimplemented!()
         }

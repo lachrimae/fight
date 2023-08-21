@@ -23,6 +23,7 @@ pub fn update_graphics_system(
             Action::Standing => images.postbox_stand.clone(),
             Action::Walking => images.postbox_walk.clone(),
             Action::Jabbing => images.postbox_jab.clone(),
+            Action::NAiring(_) => images.postbox_nair.clone(),
             _ => images.postbox_stand.clone(),
         }
     }

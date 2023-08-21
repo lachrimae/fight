@@ -11,7 +11,9 @@ use ggrs::{PlayerType, SessionBuilder, UdpNonBlockingSocket};
 const FPS: usize = 60;
 
 mod action;
+mod death;
 mod graphics;
+mod hud;
 mod input;
 mod intent;
 mod physics;
@@ -76,7 +78,8 @@ fn main() {
                 .register_rollback_component::<world::Position>()
                 .register_rollback_component::<world::Acceleration>()
                 .register_rollback_component::<world::Accelerating>()
-                .register_rollback_component::<world::Moving>(),
+                .register_rollback_component::<world::Moving>()
+                .register_rollback_component::<world::Stocks>(),
         )
         .insert_resource(ClearColor(Color::rgb(0.9, 0.9, 0.9)))
         .insert_resource(types::PlayerId(0))
@@ -87,16 +90,23 @@ fn main() {
             GgrsSchedule,
             (
                 intent::input_diff_system,
-                intent::set_intent_system.after(intent::input_diff_system),
-                stance::set_stance_system.after(intent::set_intent_system),
-                physics::set_physical_props_system.after(stance::set_stance_system),
-                physics::movement_system.after(physics::set_physical_props_system),
-                physics::acceleration_system.after(physics::movement_system),
-            ),
+                intent::set_intent_system,
+                stance::set_stance_system,
+                physics::set_physical_props_system,
+                physics::movement_system,
+                physics::acceleration_system,
+                death::death_system,
+            )
+                .chain(),
         )
         .add_systems(
             Update,
-            graphics::update_graphics_system.run_if(in_state(GameState::InGame)),
+            (
+                graphics::update_graphics_system,
+                hud::update_stocks,
+                hud::update_dmg,
+            )
+                .run_if(in_state(GameState::InGame)),
         )
         .run();
 }

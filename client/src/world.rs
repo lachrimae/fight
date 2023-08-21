@@ -16,6 +16,8 @@ pub struct ImageAssets {
     pub postbox_walk: Handle<Image>,
     #[asset(path = "postbox-jab.png")]
     pub postbox_jab: Handle<Image>,
+    #[asset(path = "postbox-nair.png")]
+    pub postbox_nair: Handle<Image>,
 }
 
 #[derive(Component, Reflect, Default)]
@@ -48,6 +50,11 @@ pub struct Allegiance {
 #[derive(Component, Reflect, Default)]
 pub struct Stocks {
     pub count: u8,
+}
+
+#[derive(Component, Reflect, Default)]
+pub struct Damage {
+    pub percent: u16,
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
@@ -166,6 +173,9 @@ pub struct FightingStance {
     pub countup: u8,
 }
 
+#[derive(Component, Default, Reflect, Debug)]
+pub struct StocksText {}
+
 pub fn startup_system(mut commands: Commands, asset_server: Res<AssetServer>) {
     log::debug!("Loading sprites");
     let stand_texture = asset_server.load("postbox-stand.png");
@@ -198,12 +208,13 @@ pub fn startup_system(mut commands: Commands, asset_server: Res<AssetServer>) {
             Intent(IntentKind::Neutral),
             FightingStance::default(),
             CombinedInputDiff::default(),
-            Position { x: 0, y: 40 },
+            Position { x: 0, y: 86 },
             Velocity { x: 0, y: 0 },
             Acceleration { x: 0, y: 0 },
             Accelerating {},
             Moving {},
             Stocks { count: 4 },
+            Damage { percent: 0 },
             CollisionRect {
                 width: 80,
                 height: 80,
@@ -214,4 +225,43 @@ pub fn startup_system(mut commands: Commands, asset_server: Res<AssetServer>) {
             },
         ))
         .add_rollback();
+
+    commands
+        .spawn((
+            NodeBundle {
+                style: Style {
+                    width: Val::Px(80.),
+                    height: Val::Px(80.),
+                    border: UiRect::all(Val::Px(2.)),
+                    justify_content: JustifyContent::Center,
+                    align_items: AlignItems::Center,
+                    position_type: PositionType::Absolute,
+                    left: Val::Px(200.),
+                    top: Val::Px(640.),
+                    ..default()
+                },
+                border_color: BorderColor(Color::BLACK),
+                background_color: BackgroundColor(Color::WHITE),
+                ..default()
+            },
+            Allegiance {
+                handle: PlayerId(0),
+            },
+        ))
+        .with_children(|parent| {
+            parent.spawn((
+                TextBundle::from_section(
+                    "4 stocks",
+                    TextStyle {
+                        font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+                        font_size: 30.0,
+                        color: Color::BLACK,
+                    },
+                ),
+                Allegiance {
+                    handle: PlayerId(0),
+                },
+                StocksText {},
+            ));
+        });
 }

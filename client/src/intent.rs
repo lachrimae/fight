@@ -133,12 +133,16 @@ fn mk_command(input: CombinedInputDiff) -> Intent {
         } else if is_left {
             if input.is_being_pressed(DiscreteInput::Hit) {
                 IntentKind::LeftTilt
+            } else if matches!(input.get(DiscreteInput::Jump), InputDiff::Pressed) {
+                IntentKind::Jump
             } else {
                 IntentKind::GoLeft
             }
         } else if is_right {
             if input.is_being_pressed(DiscreteInput::Hit) {
                 IntentKind::RightTilt
+            } else if matches!(input.get(DiscreteInput::Jump), InputDiff::Pressed) {
+                IntentKind::Jump
             } else {
                 IntentKind::GoRight
             }

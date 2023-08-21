@@ -1,6 +1,7 @@
 use crate::action;
 use crate::world::{
     Action, Allegiance, FightingStance, Intent, IntentKind, Jumps, Orientation, Platform, Position,
+    StandingOn,
 };
 use bevy::log;
 use bevy::prelude::*;
@@ -13,7 +14,7 @@ fn num_countdown_frames(action: Action) -> i8 {
         Action::Falling(_) => -1,
         Action::Walking => -1,
         Action::Jabbing => 13,
-        Action::NAiring(_) => 40,
+        Action::NAiring(_) => 25,
     }
 }
 
@@ -117,32 +118,11 @@ fn new_stance(
 
 const FIGHTER_DIMENSIONS: i32 = 40;
 
-fn fighter_is_in_air(pos: &Position, query: &Query<&Platform>) -> bool {
-    for plat in query.iter() {
-        if pos.x < plat.x + plat.width
-            && pos.x + FIGHTER_DIMENSIONS > plat.x
-            && pos.y < plat.y + 1
-            && pos.y + FIGHTER_DIMENSIONS > plat.y
-        {
-            log::trace!("Character at {:?} standing on platform at {:?}", pos, plat);
-            return false;
-        } else {
-            log::trace!(
-                "Character at {:?} not standing on platform at {:?}",
-                pos,
-                plat
-            );
-        }
-    }
-    true
-}
-
 pub fn set_stance_system(
-    mut fighter_query: Query<(&mut FightingStance, &Position, &Intent)>,
-    platform_query: Query<&Platform>,
+    mut fighter_query: Query<(&mut FightingStance, &Position, &Intent, Option<&StandingOn>)>,
 ) {
     log::debug!("Setting stances");
-    for (mut stance, position, intent) in fighter_query.iter_mut() {
+    for (mut stance, position, intent, standing_on) in fighter_query.iter_mut() {
         let mut unchanged = true;
         if stance.countdown >= 0 {
             stance.countdown -= 1;
@@ -161,7 +141,8 @@ pub fn set_stance_system(
             stance.countdown = num_countdown_frames(stance.action);
             stance.countup = 0;
         }
-        let should_fall = fighter_is_in_air(position, &platform_query);
+        let should_fall = matches!(standing_on, None);
+        log::trace!("Should fall: {should_fall}");
         let is_aerial = action::is_aerial(stance.action);
         let is_jump = matches!(stance.action, Action::Jumping(_));
         if should_fall && !is_aerial {

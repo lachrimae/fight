@@ -1,6 +1,6 @@
 use crate::world::{
     Accelerating, Acceleration, Action, Fighter, FightingStance, Intent, IntentKind, Moving,
-    Orientation, Platform, Position, Velocity,
+    Orientation, Platform, PlatformId, Position, StandingOn, Velocity,
 };
 use bevy::log;
 use bevy::prelude::*;
@@ -11,10 +11,17 @@ use crate::action;
 const TERMINAL_VELOCITY: i32 = 20;
 
 pub fn set_physical_props_system(
-    mut query: Query<(&mut Velocity, &mut Acceleration, &FightingStance, &Intent)>,
+    mut commands: Commands,
+    mut query: Query<(
+        Entity,
+        &mut Velocity,
+        &mut Acceleration,
+        &FightingStance,
+        &Intent,
+    )>,
 ) {
     log::debug!("physical props system beginning");
-    for (mut vel, mut acc, stance, intent) in query.iter_mut() {
+    for (entity, mut vel, mut acc, stance, intent) in query.iter_mut() {
         if action::stops_movement(stance.action) {
             acc.x = 0;
             acc.y = 0;
@@ -45,6 +52,8 @@ pub fn set_physical_props_system(
         }
         if stance.action == Action::Walking {
             acc.x = 0;
+            acc.y = 0;
+            vel.y = 0;
             match stance.orientation {
                 Orientation::Left => {
                     vel.x = -3;
@@ -53,8 +62,9 @@ pub fn set_physical_props_system(
                     vel.x = 3;
                 }
             }
-        } else if let Action::Jumping(_) = stance.action {
+        } else if matches!(stance.action, Action::Jumping(_)) {
             log::trace!("Jumping!");
+            commands.entity(entity).remove::<StandingOn>();
             vel.y = 18;
         }
         // TODO: account for other directions of movement
@@ -76,8 +86,8 @@ const FIGHTER_DIMENSIONS: i32 = 40;
 fn fighter_is_on_plat(pos: &Position, plat: &Platform) -> bool {
     if pos.x < plat.x + plat.width
         && pos.x + FIGHTER_DIMENSIONS > plat.x
-        && pos.y < plat.y + 1
-        && pos.y + FIGHTER_DIMENSIONS > plat.y
+        && pos.y - 1 < plat.y + 1
+        && pos.y > plat.y
     {
         log::trace!("Character at {:?} standing on platform at {:?}", pos, plat);
         true
@@ -95,9 +105,10 @@ fn first_collision(
     position: &Position,
     velocity: &Velocity,
     platform_query: &Query<&Platform>,
-) -> Option<Position> {
-    let mut result: Option<Position> = None;
+) -> Option<(PlatformId, Position)> {
+    let mut result: Option<(PlatformId, Position)> = None;
     for platform in platform_query.iter() {
+        let mut collided = false;
         let x_diff = velocity.x.signum();
         let y_diff = velocity.y.signum();
         if x_diff == 0 && y_diff == 0 {
@@ -106,13 +117,24 @@ fn first_collision(
         let mut test_x = 0;
         let mut test_y = 0;
         if x_diff == 0 || y_diff == 0 {
-            while !fighter_is_on_plat(
-                &Position {
-                    x: position.x + test_x,
-                    y: position.y + test_y,
-                },
-                platform,
-            ) {
+            log::trace!(
+                "Beginning collision loop with vars x_diff:{:?}, y_diff:{:?} and max velocity x:{:?}, y:{:?}",
+                x_diff,
+                y_diff,
+                velocity.x,
+                velocity.y,
+            );
+            loop {
+                if fighter_is_on_plat(
+                    &Position {
+                        x: position.x + test_x,
+                        y: position.y + test_y,
+                    },
+                    platform,
+                ) {
+                    collided = true;
+                    break;
+                }
                 test_x += x_diff;
                 test_y += y_diff;
                 if test_x.abs() > velocity.x.abs() || test_y.abs() > velocity.y.abs() {
@@ -127,18 +149,16 @@ fn first_collision(
                 velocity.x,
                 velocity.y,
             );
-            let mut count = 0;
-            // TODO: make this loop a little bit smarter.
-            while !fighter_is_on_plat(
-                &Position {
-                    x: position.x + test_x,
-                    y: position.y + test_y,
-                },
-                platform,
-            ) {
-                count += 1;
-                if count > 200 {
-                    panic!();
+            loop {
+                if fighter_is_on_plat(
+                    &Position {
+                        x: position.x + test_x,
+                        y: position.y + test_y,
+                    },
+                    platform,
+                ) {
+                    collided = true;
+                    break;
                 }
                 if (test_y * velocity.x).abs() >= (velocity.y * test_x).abs() {
                     test_x += x_diff;
@@ -150,18 +170,28 @@ fn first_collision(
                 }
             }
         }
-        if let Some(ref pos) = result {
-            if pos.x - position.x > test_x && pos.y - position.y > test_y {
-                result = Some(Position {
-                    x: position.x + test_x,
-                    y: position.y + test_y,
-                });
+        if !collided {
+            continue;
+        }
+        if let Some(ref pair) = result {
+            let pos = &pair.1;
+            if pos.x - position.x + pos.y - position.y > test_x + test_y {
+                result = Some((
+                    platform.id,
+                    Position {
+                        x: position.x + test_x,
+                        y: position.y + test_y,
+                    },
+                ));
             }
         } else {
-            result = Some(Position {
-                x: position.x + test_x,
-                y: position.y + test_y,
-            });
+            result = Some((
+                platform.id,
+                Position {
+                    x: position.x + test_x,
+                    y: position.y + test_y,
+                },
+            ));
         }
     }
     result
@@ -169,23 +199,40 @@ fn first_collision(
 
 pub fn movement_system(
     mut fighter_query: Query<
-        (&mut Position, &Velocity, &FightingStance),
+        (Entity, &mut Position, &Velocity, &mut FightingStance),
         (With<Moving>, With<Fighter>),
     >,
-    platform_query: Query<&Platform>,
+    platform_query: Query<(&Platform)>,
+    mut commands: Commands,
 ) {
     log::debug!("movement system beginning");
-    for (mut position, velocity, stance) in &mut fighter_query {
+    for (fighter_entity, mut position, velocity, mut stance) in &mut fighter_query {
         if matches!(stance.action, Action::Jumping(_)) {
             log::trace!("Player jumping");
             position.x += velocity.x;
             position.y += velocity.y;
+            commands.entity(fighter_entity).remove::<StandingOn>();
         } else {
-            let col = first_collision(&position, &velocity, &platform_query);
-            if let Some(col_position) = col {
-                log::trace!("Player movement obstructed");
-                *position = col_position;
-            } else {
+            let mut obstructed = false;
+            let falling = velocity.y < 0;
+            if falling {
+                let first_col = first_collision(&position, &velocity, &platform_query);
+                if let Some((plat, col_position)) = first_col {
+                    log::trace!("Player movement obstructed");
+                    obstructed = true;
+                    commands
+                        .entity(fighter_entity)
+                        .insert(StandingOn { platform: plat });
+                    *position = col_position;
+                    if action::is_aerial(stance.action) {
+                        stance.action = Action::Standing;
+                    }
+                }
+                if !obstructed {
+                    commands.entity(fighter_entity).remove::<StandingOn>();
+                }
+            }
+            if !obstructed {
                 log::trace!("Player moving unobstructed");
                 position.x += velocity.x;
                 position.y += velocity.y;

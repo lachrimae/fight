@@ -35,11 +35,15 @@ pub struct CollisionRect {
     pub height: i32,
 }
 
+#[derive(Copy, Clone, Default, Reflect, Debug, PartialEq, Eq)]
+pub struct PlatformId(u8);
+
 #[derive(Debug, Component)]
 pub struct Platform {
     pub x: i32,
     pub y: i32,
     pub width: i32,
+    pub id: PlatformId,
 }
 
 #[derive(Component, Reflect, Default, Debug)]
@@ -179,6 +183,11 @@ pub struct StocksText {}
 #[derive(Component, Default, Reflect, Debug)]
 pub struct DamageText {}
 
+#[derive(Component, Default, Reflect, Debug)]
+pub struct StandingOn {
+    pub platform: PlatformId,
+}
+
 pub fn startup_system(mut commands: Commands, asset_server: Res<AssetServer>) {
     log::debug!("Loading sprites");
     let stand_texture = asset_server.load("postbox-stand.png");
@@ -186,11 +195,12 @@ pub fn startup_system(mut commands: Commands, asset_server: Res<AssetServer>) {
     log::debug!("Spawning camera");
     commands.spawn(Camera2dBundle::default());
     log::debug!("Spawning fighters");
-    commands.spawn((
+    let main_plat = commands.spawn((
         Platform {
             x: -50,
             y: 0,
             width: 100,
+            id: PlatformId(0),
         },
         SpriteBundle {
             transform: Transform::from_translation(Vec3::new(-50., 0., 0.)),
@@ -216,6 +226,9 @@ pub fn startup_system(mut commands: Commands, asset_server: Res<AssetServer>) {
             Acceleration { x: 0, y: 0 },
             Accelerating {},
             Moving {},
+            StandingOn {
+                platform: PlatformId(0),
+            },
             Stocks { count: 4 },
             Damage { percent: 0 },
             CollisionRect {

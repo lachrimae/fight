@@ -176,6 +176,9 @@ pub struct FightingStance {
 #[derive(Component, Default, Reflect, Debug)]
 pub struct StocksText {}
 
+#[derive(Component, Default, Reflect, Debug)]
+pub struct DamageText {}
+
 pub fn startup_system(mut commands: Commands, asset_server: Res<AssetServer>) {
     log::debug!("Loading sprites");
     let stand_texture = asset_server.load("postbox-stand.png");
@@ -230,7 +233,7 @@ pub fn startup_system(mut commands: Commands, asset_server: Res<AssetServer>) {
         .spawn((
             NodeBundle {
                 style: Style {
-                    width: Val::Px(80.),
+                    width: Val::Px(160.),
                     height: Val::Px(80.),
                     border: UiRect::all(Val::Px(2.)),
                     justify_content: JustifyContent::Center,
@@ -262,6 +265,20 @@ pub fn startup_system(mut commands: Commands, asset_server: Res<AssetServer>) {
                     handle: PlayerId(0),
                 },
                 StocksText {},
+            ));
+            parent.spawn((
+                TextBundle::from_section(
+                    "0%",
+                    TextStyle {
+                        font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+                        font_size: 30.0,
+                        color: Color::BLACK,
+                    },
+                ),
+                Allegiance {
+                    handle: PlayerId(0),
+                },
+                DamageText {},
             ));
         });
 }

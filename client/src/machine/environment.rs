@@ -3,7 +3,9 @@ use super::common::{
     TransitionResult,
 };
 use crate::characteristics::{evil_postbox, postbox, Character};
+use crate::machine::grounded::types as grounded;
 use bevy::log;
+use std::boxed::Box;
 
 pub mod types;
 use types::{Characteristics, Jumps, State};
@@ -32,29 +34,28 @@ impl Machine for State {
         let characteristics = get_characteristics(context.character);
 
         match self {
-            State::Aerial(_) => {
-                match physics {
-                    PhysicsEvent::FellOffPlat => {
-                        log::warn!("Fell off platform while aerial");
-                        MachineResult::Remain
-                    }
-                    PhysicsEvent::LandedOnPlat => {
-                        *self = State::Grounded;
-                        MachineResult::Transition(TransitionResult {
-                            // TODO: give it a landing animation child
-                            children: vec![].into(),
-                            countdown: characteristics.countdown(self),
-                        })
-                    }
-                    PhysicsEvent::GotHit => {
-                        unimplemented!();
-                    }
+            State::Aerial(_) => match physics {
+                PhysicsEvent::FellOffPlat => {
+                    log::warn!("Fell off platform while aerial");
+                    MachineResult::Remain
                 }
-            }
+                PhysicsEvent::LandedOnPlat => {
+                    *self = State::Grounded;
+                    MachineResult::Transition(TransitionResult {
+                        children: vec![Box::new(grounded::State::Landing) as Box<dyn Machine>]
+                            .into(),
+                        countdown: characteristics.countdown(self),
+                    })
+                }
+                PhysicsEvent::GotHit => {
+                    unimplemented!();
+                }
+            },
             State::Grounded => match physics {
                 PhysicsEvent::FellOffPlat => {
                     *self = State::Aerial(Jumps(1));
                     MachineResult::Transition(TransitionResult {
+                        // TODO: give a falling animation here
                         children: vec![].into(),
                         countdown: characteristics.countdown(self),
                     })

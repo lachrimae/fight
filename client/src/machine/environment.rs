@@ -6,9 +6,15 @@ use crate::characteristics::{postbox, Character};
 use bevy::log;
 
 pub mod types;
-use types::{EnvironmentCharacteristics, EnvironmentState, Jumps};
+use types::{Characteristics, Jumps, State};
 
-impl Machine for EnvironmentState {
+fn get_characteristics(character: Character) -> &'static dyn Characteristics {
+    match character {
+        Character::Postbox => &postbox::postbox,
+    }
+}
+
+impl Machine for State {
     fn consume_input(
         &mut self,
         _context: &MachineContext,
@@ -22,19 +28,17 @@ impl Machine for EnvironmentState {
         context: &MachineContext,
         physics: &PhysicsEvent,
     ) -> MachineResult {
-        let characteristics: Box<dyn EnvironmentCharacteristics> = match context.character {
-            Character::Postbox => Box::new(postbox::Postbox {}),
-        };
+        let characteristics = get_characteristics(context.character);
 
         match self {
-            EnvironmentState::Aerial(_) => {
+            State::Aerial(_) => {
                 match physics {
                     PhysicsEvent::FellOffPlat => {
                         log::warn!("Fell off platform while aerial");
                         MachineResult::Remain
                     }
                     PhysicsEvent::LandedOnPlat => {
-                        *self = EnvironmentState::Grounded;
+                        *self = State::Grounded;
                         MachineResult::Transition(TransitionResult {
                             // TODO: give it a landing animation child
                             children: vec![].into(),
@@ -46,9 +50,9 @@ impl Machine for EnvironmentState {
                     }
                 }
             }
-            EnvironmentState::Grounded => match physics {
+            State::Grounded => match physics {
                 PhysicsEvent::FellOffPlat => {
-                    *self = EnvironmentState::Aerial(Jumps(1));
+                    *self = State::Aerial(Jumps(1));
                     MachineResult::Transition(TransitionResult {
                         children: vec![].into(),
                         countdown: characteristics.countdown(self),

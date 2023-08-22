@@ -1,12 +1,12 @@
 pub struct Jumps(pub u8);
 
-pub enum EnvironmentState {
+pub enum State {
     Aerial(Jumps),
     Grounded,
 }
 
-pub trait EnvironmentCharacteristics {
-    fn countdown(&self, state: &EnvironmentState) -> i8 {
+pub trait Characteristics {
+    fn countdown(&self, state: &State) -> i8 {
         -1
     }
 }

@@ -79,12 +79,16 @@ enum HierarchicalInput<'a> {
 }
 
 impl HierarchicalMachine {
-    fn consume_thing(&mut self, input: &mut HierarchicalInput) {
-        for machine in self.machine_stack.iter_mut().rev() {
-            let res = match input {
-                HierarchicalInput::MachineInput(i) => machine.consume_input(&self.context, *i),
-                HierarchicalInput::PhysicsEvent(e) => {
-                    machine.consume_physics_event(&self.context, *e)
+    fn consume_thing(mut self, input: &mut HierarchicalInput) -> Self {
+        let mut index = self.machine_stack.len() - 1;
+        while index >= 0 {
+            let res = {
+                let machine = &mut self.machine_stack[index];
+                match input {
+                    HierarchicalInput::MachineInput(i) => machine.consume_input(&self.context, *i),
+                    HierarchicalInput::PhysicsEvent(e) => {
+                        machine.consume_physics_event(&self.context, *e)
+                    }
                 }
             };
             match res {
@@ -94,21 +98,24 @@ impl HierarchicalMachine {
                         self.context.countdown -= 1;
                     }
                 }
-                MachineResult::Transition(transition) => {
-                    transition.children.map(|v| {
-                        unimplemented!();
+                MachineResult::Transition(mut transition) => {
+                    transition.children.as_mut().map(|mut v| {
+                        self.machine_stack.truncate(index + 1);
+                        self.machine_stack.append(&mut v);
                     });
                     self.context.countdown = transition.countdown;
                     self.context.countup = 0;
                 }
             }
+            index -= 1;
         }
+        self
     }
-    pub fn consume_input(&mut self, input: &mut MachineInput) {
+    pub fn consume_input(mut self, input: &mut MachineInput) -> Self {
         self.consume_thing(&mut HierarchicalInput::MachineInput(input))
     }
 
-    pub fn consume_physics_event(&mut self, event: &mut PhysicsEvent) {
+    pub fn consume_physics_event(mut self, event: &mut PhysicsEvent) -> Self {
         self.consume_thing(&mut HierarchicalInput::PhysicsEvent(event))
     }
 

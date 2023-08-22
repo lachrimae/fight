@@ -1,11 +1,13 @@
+use bevy::log;
+use bevy::prelude::*;
+use std::option::Option;
+
 use crate::action;
+use crate::world;
 use crate::world::{
     Action, Allegiance, FightingStance, Intent, IntentKind, Jumps, Orientation, Platform, Position,
     StandingOn,
 };
-use bevy::log;
-use bevy::prelude::*;
-use std::option::Option;
 
 fn num_countdown_frames(action: Action) -> i8 {
     match action {
@@ -120,6 +122,7 @@ const FIGHTER_DIMENSIONS: i32 = 40;
 
 pub fn set_stance_system(
     mut fighter_query: Query<(&mut FightingStance, &Position, &Intent, Option<&StandingOn>)>,
+    plat_query: Query<&Platform>,
 ) {
     log::debug!("Setting stances");
     for (mut stance, position, intent, standing_on) in fighter_query.iter_mut() {
@@ -141,7 +144,20 @@ pub fn set_stance_system(
             stance.countdown = num_countdown_frames(stance.action);
             stance.countup = 0;
         }
-        let should_fall = matches!(standing_on, None);
+        let should_fall = {
+            if let Some(platform_entity) = standing_on {
+                let mut supported = false;
+                for plat in plat_query.iter() {
+                    if world::fighter_is_on_plat(position, plat) {
+                        supported = true;
+                        break;
+                    }
+                }
+                supported
+            } else {
+                true
+            }
+        };
         log::trace!("Should fall: {should_fall}");
         let is_aerial = action::is_aerial(stance.action);
         let is_jump = matches!(stance.action, Action::Jumping(_));

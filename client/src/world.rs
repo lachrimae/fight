@@ -46,6 +46,26 @@ pub struct Platform {
     pub id: PlatformId,
 }
 
+const FIGHTER_DIMENSIONS: i32 = 40;
+
+pub fn fighter_is_on_plat(pos: &Position, plat: &Platform) -> bool {
+    if pos.x < plat.x + plat.width
+        && pos.x + FIGHTER_DIMENSIONS > plat.x
+        && pos.y - 1 < plat.y + 1
+        && pos.y > plat.y
+    {
+        log::trace!("Character at {:?} standing on platform at {:?}", pos, plat);
+        true
+    } else {
+        log::trace!(
+            "Character at {:?} not standing on platform at {:?}",
+            pos,
+            plat
+        );
+        false
+    }
+}
+
 #[derive(Component, Reflect, Default, Debug)]
 pub struct Allegiance {
     pub handle: PlayerId,

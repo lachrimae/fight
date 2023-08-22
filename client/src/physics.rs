@@ -6,6 +6,7 @@ use bevy::log;
 use bevy::prelude::*;
 
 use crate::action;
+use crate::world;
 
 // TODO: make this depend on character
 const TERMINAL_VELOCITY: i32 = 20;
@@ -81,26 +82,6 @@ pub fn set_physical_props_system(
     }
 }
 
-const FIGHTER_DIMENSIONS: i32 = 40;
-
-fn fighter_is_on_plat(pos: &Position, plat: &Platform) -> bool {
-    if pos.x < plat.x + plat.width
-        && pos.x + FIGHTER_DIMENSIONS > plat.x
-        && pos.y - 1 < plat.y + 1
-        && pos.y > plat.y
-    {
-        log::trace!("Character at {:?} standing on platform at {:?}", pos, plat);
-        true
-    } else {
-        log::trace!(
-            "Character at {:?} not standing on platform at {:?}",
-            pos,
-            plat
-        );
-        false
-    }
-}
-
 fn first_collision(
     position: &Position,
     velocity: &Velocity,
@@ -125,7 +106,7 @@ fn first_collision(
                 velocity.y,
             );
             loop {
-                if fighter_is_on_plat(
+                if world::fighter_is_on_plat(
                     &Position {
                         x: position.x + test_x,
                         y: position.y + test_y,
@@ -150,7 +131,7 @@ fn first_collision(
                 velocity.y,
             );
             loop {
-                if fighter_is_on_plat(
+                if world::fighter_is_on_plat(
                     &Position {
                         x: position.x + test_x,
                         y: position.y + test_y,
@@ -227,9 +208,6 @@ pub fn movement_system(
                     if action::is_aerial(stance.action) {
                         stance.action = Action::Standing;
                     }
-                }
-                if !obstructed {
-                    commands.entity(fighter_entity).remove::<StandingOn>();
                 }
             }
             if !obstructed {

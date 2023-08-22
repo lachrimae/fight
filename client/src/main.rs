@@ -11,11 +11,13 @@ use ggrs::{PlayerType, SessionBuilder, UdpNonBlockingSocket};
 const FPS: usize = 60;
 
 mod action;
+mod characteristics;
 mod death;
 mod graphics;
 mod hud;
 mod input;
 mod intent;
+mod machine;
 mod physics;
 mod stance;
 mod types;

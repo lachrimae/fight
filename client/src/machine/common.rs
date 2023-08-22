@@ -35,14 +35,14 @@ impl MachineInput {
     }
 }
 
-pub struct TransitionResult {
-    pub children: Option<Vec<Box<dyn Machine>>>,
+pub struct TransitionResult<'a> {
+    pub children: Option<Vec<&'a dyn Machine>>,
     pub countdown: i8,
 }
 
-pub enum MachineResult {
+pub enum MachineResult<'a> {
     Remain,
-    Transition(TransitionResult),
+    Transition(TransitionResult<'a>),
 }
 
 pub trait Machine {
@@ -65,9 +65,9 @@ pub struct MachineContext {
     pub countup: u8,
 }
 
-struct HierarchicalMachine {
-    machine_stack: Vec<Box<dyn Machine>>,
-    context: MachineContext,
+struct HierarchicalMachine<'a> {
+    machine_stack: Vec<&'a mut dyn Machine>,
+    pub context: MachineContext,
 }
 
 enum HierarchicalInput<'a> {
@@ -75,7 +75,7 @@ enum HierarchicalInput<'a> {
     PhysicsEvent(&'a mut PhysicsEvent),
 }
 
-impl HierarchicalMachine {
+impl HierarchicalMachine<'_> {
     fn consume_thing(&mut self, input: &mut HierarchicalInput) {
         for machine in self.machine_stack.iter_mut().rev() {
             let res = match input {

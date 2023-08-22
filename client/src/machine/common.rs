@@ -2,6 +2,9 @@ use crate::characteristics::{postbox, Character};
 use bevy::log;
 use std::collections::HashMap;
 
+// TODO: at some point, profile the use of Box<dyn Machine> here. If it is too expensive,
+// come up with a way of using &dyn Machine and allocating via an object pool.
+
 pub enum AerialAction {
     Hopping,
     Jumping,

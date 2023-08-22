@@ -1,5 +1,6 @@
-use crate::characteristics::{Character};
-
+use crate::characteristics::Character;
+use crate::input::DiscreteInput;
+use crate::world::InputDiff;
 use std::collections::HashMap;
 
 // TODO: at some point, profile the use of Box<dyn Machine> here. If it is too expensive,
@@ -27,13 +28,10 @@ pub enum PhysicsEvent {
     GotHit,
 }
 
-type Key = ();
-type InputDiff = ();
-
-pub struct MachineInput(HashMap<Key, InputDiff>);
+pub struct MachineInput(HashMap<DiscreteInput, InputDiff>);
 
 impl MachineInput {
-    pub fn consume(&mut self, key: &Key) -> Option<InputDiff> {
+    pub fn consume(&mut self, key: DiscreteInput) -> Option<InputDiff> {
         self.0.remove(&key)
     }
 }

@@ -7,7 +7,7 @@ use ggrs::PlayerHandle;
 
 use strum_macros::EnumIter;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter, Hash)]
 #[repr(u8)]
 pub enum DiscreteInput {
     Jump,

@@ -10,8 +10,8 @@ use types::{Characteristics, Jumps, State};
 
 fn get_characteristics(character: Character) -> &'static dyn Characteristics {
     match character {
-        Character::Postbox => &postbox::postbox,
-        Character::EvilPostbox => &evil_postbox::evil_postbox,
+        Character::Postbox => &postbox::POSTBOX,
+        Character::EvilPostbox => &evil_postbox::EVIL_POSTBOX,
     }
 }
 

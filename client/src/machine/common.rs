@@ -35,14 +35,14 @@ impl MachineInput {
     }
 }
 
-pub struct TransitionResult<'a> {
-    pub children: Option<Vec<&'a dyn Machine>>,
+pub struct TransitionResult {
+    pub children: Option<Vec<Box<dyn Machine>>>,
     pub countdown: i8,
 }
 
-pub enum MachineResult<'a> {
+pub enum MachineResult {
     Remain,
-    Transition(TransitionResult<'a>),
+    Transition(TransitionResult),
 }
 
 pub trait Machine {

@@ -11,7 +11,5 @@ pub enum State {
 }
 
 pub trait Characteristics {
-    fn countdown(&self, state: &State) -> i8 {
-        -1
-    }
+    fn countdown(&self, state: &State) -> i8;
 }

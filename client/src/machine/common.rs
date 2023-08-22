@@ -80,10 +80,12 @@ enum HierarchicalInput<'a> {
 
 impl HierarchicalMachine {
     fn consume_thing(mut self, input: &mut HierarchicalInput) -> Self {
-        let mut index = self.machine_stack.len() - 1;
+        // This stack should remain short enough that this is safe.
+        let mut index: i8 = (self.machine_stack.len() - 1).try_into().unwrap();
         while index >= 0 {
             let res = {
-                let machine = &mut self.machine_stack[index];
+                let machine: &mut Box<dyn Machine> =
+                    &mut self.machine_stack[<i8 as TryInto<usize>>::try_into(index).unwrap()];
                 match input {
                     HierarchicalInput::MachineInput(i) => machine.consume_input(&self.context, *i),
                     HierarchicalInput::PhysicsEvent(e) => {
@@ -100,7 +102,7 @@ impl HierarchicalMachine {
                 }
                 MachineResult::Transition(mut transition) => {
                     transition.children.as_mut().map(|mut v| {
-                        self.machine_stack.truncate(index + 1);
+                        self.machine_stack.truncate((index + 1).try_into().unwrap());
                         self.machine_stack.append(&mut v);
                     });
                     self.context.countdown = transition.countdown;
@@ -111,6 +113,7 @@ impl HierarchicalMachine {
         }
         self
     }
+
     pub fn consume_input(mut self, input: &mut MachineInput) -> Self {
         self.consume_thing(&mut HierarchicalInput::MachineInput(input))
     }

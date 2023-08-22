@@ -1,16 +1,38 @@
-use crate::machine::common::*;
+use super::common::{
+    DefenseState, Machine, MachineContext, MachineInput, MachineResult, PhysicsEvent,
+    TransitionResult,
+};
+use crate::characteristics::{evil_postbox, postbox, Character};
+use bevy::log;
 
-pub enum GroundAction {
-    Hopping,
-    Walking,
-    Dashing,
-    CharacterAction,
+pub mod types;
+use types::{Characteristics, State};
+
+fn get_characteristics(character: Character) -> &'static dyn Characteristics {
+    match character {
+        Character::Postbox => &postbox::POSTBOX,
+        Character::EvilPostbox => &evil_postbox::EVIL_POSTBOX,
+    }
 }
 
-pub struct GroundedState {
-    action: GroundAction,
-}
+impl Machine for State {
+    fn consume_input(
+        &mut self,
+        _context: &MachineContext,
+        input: &mut MachineInput,
+    ) -> MachineResult {
+        MachineResult::Remain
+    }
 
-impl Machine for GroundedState {
-    fn take_input(&self)
+    fn consume_physics_event(
+        &mut self,
+        context: &MachineContext,
+        physics: &PhysicsEvent,
+    ) -> MachineResult {
+        MachineResult::Remain
+    }
+
+    fn defense_state(&self) -> DefenseState {
+        DefenseState::Normal
+    }
 }

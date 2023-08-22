@@ -4,7 +4,7 @@ use bevy::log;
 use bevy::prelude::*;
 use bytemuck::{Pod, Zeroable};
 use ggrs::PlayerHandle;
-use std::collections::HashMap;
+
 use strum_macros::EnumIter;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter)]

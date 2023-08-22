@@ -215,7 +215,7 @@ pub fn startup_system(mut commands: Commands, asset_server: Res<AssetServer>) {
     log::debug!("Spawning camera");
     commands.spawn(Camera2dBundle::default());
     log::debug!("Spawning fighters");
-    let main_plat = commands.spawn((
+    let _main_plat = commands.spawn((
         Platform {
             x: -50,
             y: 0,

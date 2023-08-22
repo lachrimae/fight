@@ -183,7 +183,7 @@ pub fn movement_system(
         (Entity, &mut Position, &Velocity, &mut FightingStance),
         (With<Moving>, With<Fighter>),
     >,
-    platform_query: Query<(&Platform)>,
+    platform_query: Query<&Platform>,
     mut commands: Commands,
 ) {
     log::debug!("movement system beginning");

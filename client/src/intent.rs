@@ -3,7 +3,7 @@ use crate::types::*;
 use crate::world::{
     is_being_pressed, Allegiance, CombinedInputDiff, InputDiff, Intent, IntentKind,
 };
-use bevy::input::ButtonState;
+
 use bevy::log;
 use bevy::prelude::*;
 use bevy_ggrs::PlayerInputs;
@@ -158,7 +158,7 @@ fn mk_command(input: CombinedInputDiff) -> Intent {
 }
 
 pub fn set_intent_system(
-    keyboard_input: Res<PlayerInputs<GgrsConfig>>,
+    _keyboard_input: Res<PlayerInputs<GgrsConfig>>,
     mut query: Query<(&mut Intent, &CombinedInputDiff, &Allegiance)>,
 ) {
     log::debug!("Setting intents");

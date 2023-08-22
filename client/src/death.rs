@@ -7,7 +7,7 @@ pub fn death_system(
     mut query: Query<(&mut Position, &mut Stocks, Entity), With<Fighter>>,
 ) {
     for (mut position, mut stocks, entity) in query.iter_mut() {
-        if (position.x.abs() > 720 || position.y.abs() > 720) {
+        if position.x.abs() > 720 || position.y.abs() > 720 {
             log::debug!("Character dying");
             stocks.count -= 1;
             if stocks.count <= 0 {

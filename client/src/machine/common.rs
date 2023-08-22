@@ -1,5 +1,5 @@
-use crate::characteristics::{postbox, Character};
-use bevy::log;
+use crate::characteristics::{Character};
+
 use std::collections::HashMap;
 
 // TODO: at some point, profile the use of Box<dyn Machine> here. If it is too expensive,
@@ -114,11 +114,11 @@ impl HierarchicalMachine {
         self
     }
 
-    pub fn consume_input(mut self, input: &mut MachineInput) -> Self {
+    pub fn consume_input(self, input: &mut MachineInput) -> Self {
         self.consume_thing(&mut HierarchicalInput::MachineInput(input))
     }
 
-    pub fn consume_physics_event(mut self, event: &mut PhysicsEvent) -> Self {
+    pub fn consume_physics_event(self, event: &mut PhysicsEvent) -> Self {
         self.consume_thing(&mut HierarchicalInput::PhysicsEvent(event))
     }
 

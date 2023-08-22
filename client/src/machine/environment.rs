@@ -21,7 +21,7 @@ impl Machine for State {
     fn consume_input(
         &mut self,
         _context: &MachineContext,
-        input: &mut MachineInput,
+        _input: &mut MachineInput,
     ) -> MachineResult {
         MachineResult::Remain
     }

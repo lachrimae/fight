@@ -5,7 +5,7 @@ use std::option::Option;
 use crate::action;
 use crate::world;
 use crate::world::{
-    Action, Allegiance, FightingStance, Intent, IntentKind, Jumps, Orientation, Platform, Position,
+    Action, FightingStance, Intent, IntentKind, Jumps, Orientation, Platform, Position,
     StandingOn,
 };
 
@@ -145,7 +145,7 @@ pub fn set_stance_system(
             stance.countup = 0;
         }
         let should_fall = {
-            if let Some(platform_entity) = standing_on {
+            if let Some(_platform_entity) = standing_on {
                 let mut supported = false;
                 for plat in plat_query.iter() {
                     if world::fighter_is_on_plat(position, plat) {

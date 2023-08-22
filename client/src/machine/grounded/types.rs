@@ -2,6 +2,8 @@ use crate::machine::common::*;
 
 pub enum State {
     Hopping,
+    Crouching,
+    Crawling,
     Walking,
     Dashing,
     Landing,

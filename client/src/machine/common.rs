@@ -65,8 +65,8 @@ pub struct MachineContext {
     pub countup: u8,
 }
 
-struct HierarchicalMachine<'a> {
-    machine_stack: Vec<&'a mut dyn Machine>,
+struct HierarchicalMachine {
+    machine_stack: Vec<Box<dyn Machine>>,
     pub context: MachineContext,
 }
 
@@ -75,7 +75,7 @@ enum HierarchicalInput<'a> {
     PhysicsEvent(&'a mut PhysicsEvent),
 }
 
-impl HierarchicalMachine<'_> {
+impl HierarchicalMachine {
     fn consume_thing(&mut self, input: &mut HierarchicalInput) {
         for machine in self.machine_stack.iter_mut().rev() {
             let res = match input {

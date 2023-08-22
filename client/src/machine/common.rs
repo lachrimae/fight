@@ -70,10 +70,21 @@ struct HierarchicalMachine {
     context: MachineContext,
 }
 
+enum HierarchicalInput<'a> {
+    MachineInput(&'a mut MachineInput),
+    PhysicsEvent(&'a mut PhysicsEvent),
+}
+
 impl HierarchicalMachine {
-    pub fn consume_input(&mut self, input: &mut MachineInput) {
+    fn consume_thing(&mut self, input: &mut HierarchicalInput) {
         for machine in self.machine_stack.iter_mut().rev() {
-            match machine.consume_input(&self.context, input) {
+            let res = match input {
+                HierarchicalInput::MachineInput(i) => machine.consume_input(&self.context, *i),
+                HierarchicalInput::PhysicsEvent(e) => {
+                    machine.consume_physics_event(&self.context, *e)
+                }
+            };
+            match res {
                 MachineResult::Remain => {
                     self.context.countup += 1;
                     if self.context.countdown >= 0 {
@@ -89,6 +100,13 @@ impl HierarchicalMachine {
                 }
             }
         }
+    }
+    pub fn consume_input(&mut self, input: &mut MachineInput) {
+        self.consume_thing(&mut HierarchicalInput::MachineInput(input))
+    }
+
+    pub fn consume_physics_event(&mut self, event: &mut PhysicsEvent) {
+        self.consume_thing(&mut HierarchicalInput::PhysicsEvent(event))
     }
 
     pub fn defense_state(&self) -> DefenseState {

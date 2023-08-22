@@ -2,7 +2,7 @@ use super::common::{
     DefenseState, Machine, MachineContext, MachineInput, MachineResult, PhysicsEvent,
     TransitionResult,
 };
-use crate::characteristics::{postbox, Character};
+use crate::characteristics::{evil_postbox, postbox, Character};
 use bevy::log;
 
 pub mod types;
@@ -11,6 +11,7 @@ use types::{Characteristics, Jumps, State};
 fn get_characteristics(character: Character) -> &'static dyn Characteristics {
     match character {
         Character::Postbox => &postbox::postbox,
+        Character::EvilPostbox => &evil_postbox::evil_postbox,
     }
 }
 

@@ -60,7 +60,13 @@ impl Machine for State {
                         countdown: characteristics.countdown(self),
                     })
                 }
-                _ => unimplemented!(),
+                PhysicsEvent::LandedOnPlat => {
+                    log::warn!("Landed on platform while on platform");
+                    MachineResult::Remain
+                }
+                PhysicsEvent::GotHit => {
+                    unimplemented!();
+                }
             },
         }
     }

@@ -20,6 +20,7 @@ mod intent;
 mod machine;
 mod physics;
 mod stance;
+mod state;
 mod types;
 mod world;
 

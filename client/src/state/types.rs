@@ -1,6 +1,6 @@
-#[derive(Copy, Clone)]
-pub struct UserInput;
+pub use crate::state::events::UserInput;
 
+#[derive(Copy, Clone)]
 pub enum ArmourLevel {
     NoArmour,
     HyperArmour,

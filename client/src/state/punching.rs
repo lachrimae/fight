@@ -1,7 +1,9 @@
 use crate::state::standing::Standing;
 use crate::state::types::*;
-use bevy::log;
+use bevy_reflect::prelude::*;
 
+#[derive(Reflect)]
+#[reflect(State)]
 pub struct Punching;
 impl State for Punching {
     fn visit_user_input(

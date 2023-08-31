@@ -18,6 +18,7 @@ pub struct FrameContext {}
 // User inputs, collisions and timers are the main sorts of events we can expect to occur.
 // But we can imagine that new characters will need to have an extensible collection of
 
+#[bevy_reflect::reflect_trait]
 pub trait State {
     fn visit_user_input(&self, context: &FrameContext, input: UserInput) -> Option<Box<dyn State>>;
     fn visit_timeout(&self, context: &FrameContext) -> Option<Box<dyn State>>;

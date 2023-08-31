@@ -1,7 +1,10 @@
 use crate::state::punching::Punching;
 use crate::state::types::*;
 use bevy::log;
+use bevy_reflect::prelude::*;
 
+#[derive(Reflect)]
+#[reflect(State)]
 pub struct Standing;
 impl State for Standing {
     fn visit_user_input(

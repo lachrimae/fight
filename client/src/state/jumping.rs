@@ -1,7 +1,10 @@
 use crate::state::standing::Standing;
 use crate::state::types::*;
 use bevy::log;
+use bevy_reflect::prelude::*;
 
+#[derive(Reflect)]
+#[reflect(State)]
 struct Jumping;
 impl State for Jumping {
     fn visit_user_input(

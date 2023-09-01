@@ -1,3 +1,5 @@
+use bevy::prelude::*;
+
 #[derive(PartialEq, Eq, Clone, Copy)]
 pub enum Button {
     Up,
@@ -33,12 +35,15 @@ impl InputDiff {
     }
 }
 
+#[derive(Component)]
 pub enum Armour {
     None,
     HyperArmour,
     Invincibility,
 }
 
+#[derive(Component)]
 pub enum Physics {
     NotMoving,
+    Falling,
 }

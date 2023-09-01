@@ -62,8 +62,26 @@ struct FrameData {
     armour: Armour,
 }
 
-fn state_frame_data(state: Stance, frame: u8) -> FrameData {
-    unimplemented!()
+fn stance_frame_data(stance: Stance, frame: u8) -> FrameData {
+    use self::AerialStance as A;
+    use self::GroundedStance as G;
+    use self::Stance as S;
+    use Armour as R;
+    use Physics as P;
+    match stance {
+        S::Grounded(G::Standing) => FrameData {
+            physics: P::NotMoving,
+            armour: R::None,
+        },
+        S::Grounded(G::Jabbing) => FrameData {
+            physics: P::NotMoving,
+            armour: R::None,
+        },
+        S::Aerial(A::Falling) => FrameData {
+            physics: P::Falling,
+            armour: R::None,
+        },
+    }
 }
 
 fn standing_input_map(input: InputDiff) -> Option<GroundedStance> {
@@ -79,7 +97,11 @@ fn falling_input_map(input: InputDiff) -> Option<AerialStance> {
     None
 }
 
-fn grounded_user_input_map(state: GroundedStance, input: InputDiff) -> Option<GroundedStance> {
+fn grounded_user_input_map(
+    state: GroundedStance,
+    _frame: u8,
+    input: InputDiff,
+) -> Option<GroundedStance> {
     use self::GroundedStance as G;
     match state {
         G::Standing => standing_input_map(input),
@@ -87,7 +109,11 @@ fn grounded_user_input_map(state: GroundedStance, input: InputDiff) -> Option<Gr
     }
 }
 
-fn aerial_user_input_map(state: AerialStance, input: InputDiff) -> Option<AerialStance> {
+fn aerial_user_input_map(
+    state: AerialStance,
+    _frame: u8,
+    input: InputDiff,
+) -> Option<AerialStance> {
     use self::AerialStance as A;
     match state {
         A::Falling => falling_input_map(input),
@@ -98,29 +124,37 @@ fn update_stance(state: &mut PostboxState, new_stance: Stance) {
     state.countup = 0;
     state.countdown = timeout(new_stance);
     state.stance = new_stance;
+    assert!(state.countdown != 0);
+}
+
+fn tick_stance(state: &mut PostboxState) {
+    state.countup = state.countup.wrapping_add(1);
+    if state.countdown > 0 {
+        state.countdown -= 1;
+    }
+    assert!(state.countdown >= -1);
 }
 
 pub fn postbox_input_system(
-    mut query: Query<(&mut PostboxState, &InputDiff, Option<&StandingOn>)>,
+    mut query: Query<(&mut PostboxState, &mut Physics, &mut Armour, &InputDiff)>,
 ) {
     use self::Stance as S;
-    for (mut state, input, standing_on) in query.iter_mut() {
+    for (mut state, mut physics, mut armour, input) in query.iter_mut() {
+        let frame = state.countup;
         if let Some(new_stance) = match state.stance {
-            S::Grounded(g) => grounded_user_input_map(g, *input).map(|res| S::Grounded(res)),
-            S::Aerial(a) => aerial_user_input_map(a, *input).map(|res| S::Aerial(res)),
+            S::Grounded(g) => grounded_user_input_map(g, frame, *input).map(|res| S::Grounded(res)),
+            S::Aerial(a) => aerial_user_input_map(a, frame, *input).map(|res| S::Aerial(res)),
         } {
             update_stance(&mut state, new_stance);
         } else {
-            state.countup.wrapping_add(1);
-            if state.countdown > 0 {
-                state.countdown -= 1;
-            }
-        }
-        if state.countdown == 0 {
-            let new_stance = timeout_stance(state.stance);
-            if new_stance != state.stance {
+            tick_stance(&mut state);
+            if state.countdown == 0 {
+                let new_stance = timeout_stance(state.stance);
                 update_stance(&mut state, new_stance);
             }
         }
+        let frame_data = stance_frame_data(state.stance, state.countup);
+        *armour = frame_data.armour;
+        *physics = frame_data.physics;
     }
 }

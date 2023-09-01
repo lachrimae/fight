@@ -175,7 +175,12 @@ pub fn physics_system(
 ) {
     for (physics, mut pos, mut vel, mut acc) in query.iter_mut() {
         match physics {
-            Physics::NotMoving => (),
+            Physics::NotMoving => {
+                vel.x = 0;
+                vel.y = 0;
+                acc.x = 0;
+                acc.y = 0;
+            }
             Physics::Falling => vel.y = -10,
         }
     }

@@ -111,7 +111,7 @@ pub fn postbox_input_system(
         } {
             update_stance(&mut state, new_stance);
         } else {
-            state.countup += 1;
+            state.countup.wrapping_add(1);
             if state.countdown > 0 {
                 state.countdown -= 1;
             }

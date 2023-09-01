@@ -1,0 +1,9 @@
+stand:
+  armour: None
+  physics: NotMoving
+  timeout: -1
+
+punch:
+  armour: None
+  physics: NotMoving
+  timeout: 13

@@ -83,25 +83,25 @@ pub struct Damage {
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 #[repr(u16)]
-pub enum InputDiff {
+pub enum ButtonDiff {
     NotHeld = 0,
     Held = 1,
     Released = 2,
     Pressed = 3,
 }
 
-pub const fn is_being_pressed(diff: InputDiff) -> bool {
+pub const fn is_being_pressed(diff: ButtonDiff) -> bool {
     match diff {
-        InputDiff::NotHeld => false,
-        InputDiff::Held => true,
-        InputDiff::Pressed => true,
-        InputDiff::Released => false,
+        ButtonDiff::NotHeld => false,
+        ButtonDiff::Held => true,
+        ButtonDiff::Pressed => true,
+        ButtonDiff::Released => false,
     }
 }
 
 #[derive(Default, Component, Debug, Clone, Copy, PartialEq, Eq, Pod, Zeroable, Reflect)]
 #[repr(C)]
-pub struct CombinedInputDiff(pub u16);
+pub struct InputDiff(pub u16);
 
 // Rather than use a floating-point transform system,
 // the game logic uses integers. This is translated to
@@ -240,7 +240,7 @@ pub fn startup_system(mut commands: Commands, asset_server: Res<AssetServer>) {
             },
             Intent(IntentKind::Neutral),
             FightingStance::default(),
-            CombinedInputDiff::default(),
+            InputDiff::default(),
             Position { x: 0, y: 86 },
             Velocity { x: 0, y: 0 },
             Acceleration { x: 0, y: 0 },

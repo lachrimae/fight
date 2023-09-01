@@ -9,7 +9,7 @@ use strum_macros::EnumIter;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter, Hash)]
 #[repr(u8)]
-pub enum DiscreteInput {
+pub enum Button {
     Jump,
     Hit,
     Left,
@@ -34,17 +34,17 @@ fn to_input_state(n: u8) -> InputState {
 
 const BITS_PER_INPUT: u8 = 1;
 
-const fn get_shift(input: DiscreteInput) -> u8 {
+const fn get_shift(input: Button) -> u8 {
     BITS_PER_INPUT * input as u8
 }
 
 const BASE_MASK: u8 = 1;
 
-const fn shift_mask(input: DiscreteInput) -> u8 {
+const fn shift_mask(input: Button) -> u8 {
     BASE_MASK << get_shift(input)
 }
 
-fn shift_flag(input: DiscreteInput, diff: InputState) -> u8 {
+fn shift_flag(input: Button, diff: InputState) -> u8 {
     let flag = diff as u8;
     let shift = get_shift(input);
     log::trace!("input::shift_flag: shifting {:?} left by {:?}", diff, shift);
@@ -61,14 +61,14 @@ impl CombinedInput {
         CombinedInput(0)
     }
 
-    pub fn get(&self, button: DiscreteInput) -> InputState {
+    pub fn get(&self, button: Button) -> InputState {
         let shift = get_shift(button);
         let mask = shift_mask(button);
         let flag = (self.0 & mask) >> shift;
         to_input_state(flag)
     }
 
-    pub fn set(&mut self, button: DiscreteInput, state: ButtonState) {
+    pub fn set(&mut self, button: Button, state: ButtonState) {
         let next_state = match state {
             ButtonState::Pressed => InputState::Activated,
             ButtonState::Released => InputState::NotActivated,
@@ -87,13 +87,13 @@ const KEYCODES_OF_INTEREST: &[KeyCode] = &[
     KeyCode::Space,
 ];
 
-const fn keycode_mapper(keycode: &KeyCode) -> Option<DiscreteInput> {
+const fn keycode_mapper(keycode: &KeyCode) -> Option<Button> {
     match keycode {
-        KeyCode::A => Some(DiscreteInput::Left),
-        KeyCode::S => Some(DiscreteInput::Down),
-        KeyCode::D => Some(DiscreteInput::Right),
-        KeyCode::W => Some(DiscreteInput::Jump),
-        KeyCode::Space => Some(DiscreteInput::Hit),
+        KeyCode::A => Some(Button::Left),
+        KeyCode::S => Some(Button::Down),
+        KeyCode::D => Some(Button::Right),
+        KeyCode::W => Some(Button::Jump),
+        KeyCode::Space => Some(Button::Hit),
         _ => None,
     }
 }

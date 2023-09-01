@@ -7,6 +7,7 @@ use bytemuck::{Pod, Zeroable};
 use std::default::Default;
 
 use crate::machine::postbox::PostboxState;
+use crate::machine::types::{Armour, Physics};
 use crate::types::*;
 
 #[derive(AssetCollection, Resource)]
@@ -154,7 +155,7 @@ pub enum IntentKind {
 #[derive(Component, Default, Reflect, Debug)]
 pub struct Intent(pub IntentKind);
 
-#[derive(PartialEq, Eq, Copy, Clone, Debug, Reflect, Default)]
+#[derive(Component, PartialEq, Eq, Copy, Clone, Debug, Reflect, Default)]
 pub enum Orientation {
     Left,
     #[default]
@@ -236,6 +237,9 @@ pub fn startup_system(mut commands: Commands, asset_server: Res<AssetServer>) {
             },
             PostboxState::default(),
             InputDiff::default(),
+            Physics::default(),
+            Armour::default(),
+            Orientation::default(),
             Position { x: 0, y: 86 },
             Velocity { x: 0, y: 0 },
             Acceleration { x: 0, y: 0 },

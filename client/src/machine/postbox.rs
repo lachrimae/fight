@@ -3,6 +3,7 @@ use crate::machine::types::{Armour, Physics};
 use crate::world::{
     Acceleration, ButtonDiff, InputDiff, Orientation, Position, StandingOn, Velocity,
 };
+use bevy::log;
 use bevy::prelude::*;
 
 #[derive(Copy, Clone, Debug, Default, Reflect, PartialEq, Eq)]
@@ -32,8 +33,8 @@ impl Default for Stance {
 
 #[derive(Component, Reflect)]
 pub struct PostboxState {
-    stance: Stance,
-    orientation: Orientation,
+    pub stance: Stance,
+    pub orientation: Orientation,
     countdown: i8,
     countup: u8,
 }
@@ -135,6 +136,7 @@ fn aerial_user_input_map(
 
 fn update_stance(state: &mut PostboxState, new_stance: Stance) {
     state.countup = 0;
+    log::trace!("Executing frame 1 of {:?}", new_stance);
     state.countdown = timeout(new_stance);
     state.stance = new_stance;
     assert!(state.countdown != 0);
@@ -147,19 +149,28 @@ fn tick_stance(state: &mut PostboxState) {
     }
     assert!(state.countdown >= -1);
     if state.countdown == 0 {
+        log::trace!("Stance timeout");
         let new_stance = timeout_stance(state.stance);
         update_stance(state, new_stance);
+    } else {
+        log::trace!(
+            "Executing frame {:?} of {:?}",
+            state.countup + 1,
+            state.stance
+        );
     }
 }
 
 pub fn input_system(mut query: Query<(&mut PostboxState, &mut Physics, &mut Armour, &InputDiff)>) {
     use self::Stance as S;
+    log::debug!("postbox input system beginning");
     for (mut state, mut physics, mut armour, input) in query.iter_mut() {
         let frame = state.countup;
         if let Some(new_stance) = match state.stance {
             S::Grounded(g) => grounded_user_input_map(g, frame, *input).map(|res| S::Grounded(res)),
             S::Aerial(a) => aerial_user_input_map(a, frame, *input).map(|res| S::Aerial(res)),
         } {
+            log::trace!("Setting stance to {new_stance:?}");
             update_stance(&mut state, new_stance);
         } else {
             tick_stance(&mut state);
@@ -173,6 +184,7 @@ pub fn input_system(mut query: Query<(&mut PostboxState, &mut Physics, &mut Armo
 pub fn physics_system(
     mut query: Query<(&Physics, &mut Position, &mut Velocity, &mut Acceleration)>,
 ) {
+    log::debug!("postbox physics system beginning");
     for (physics, mut pos, mut vel, mut acc) in query.iter_mut() {
         match physics {
             Physics::NotMoving => {

@@ -5,8 +5,7 @@ use std::option::Option;
 use crate::action;
 use crate::world;
 use crate::world::{
-    Action, FightingStance, Intent, IntentKind, Jumps, Orientation, Platform, Position,
-    StandingOn,
+    Action, FightingStance, Intent, IntentKind, Jumps, Orientation, Platform, Position, StandingOn,
 };
 
 fn num_countdown_frames(action: Action) -> i8 {

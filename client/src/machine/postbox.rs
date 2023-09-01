@@ -1,28 +1,59 @@
 use crate::input::Button;
 use crate::machine::types::{Armour, Physics};
-use crate::world::{ButtonDiff, InputDiff};
+use crate::world::{ButtonDiff, InputDiff, Orientation, StandingOn};
 use bevy::prelude::*;
 
-#[derive(Component, Default, Reflect, Hash)]
-pub enum State {
+#[derive(Copy, Clone, Debug, Default, Reflect, PartialEq, Eq)]
+pub enum GroundedStance {
     #[default]
     Standing,
     Jabbing,
 }
 
-fn timeout_state(state: State) -> State {
-    use self::State::*;
-    match state {
-        Standing => Standing,
-        Jabbing => Jabbing,
+#[derive(Copy, Clone, Debug, Default, Reflect, PartialEq, Eq)]
+pub enum AerialStance {
+    #[default]
+    Falling,
+}
+
+#[derive(Copy, Clone, Debug, Reflect, PartialEq, Eq)]
+pub enum Stance {
+    Grounded(GroundedStance),
+    Aerial(AerialStance),
+}
+
+impl Default for Stance {
+    fn default() -> Self {
+        Stance::Grounded(GroundedStance::default())
     }
 }
 
-fn timeout(state: State) -> i8 {
-    use self::State as S;
+#[derive(Component, Default, Reflect)]
+pub struct PostboxState {
+    stance: Stance,
+    orientation: Orientation,
+    countdown: i8,
+    countup: u8,
+}
+
+fn timeout_stance(state: Stance) -> Stance {
+    use self::AerialStance as A;
+    use self::GroundedStance as G;
+    use self::Stance as S;
     match state {
-        S::Standing => -1,
-        S::Jabbing => 13,
+        S::Aerial(_) => S::Aerial(A::Falling),
+        S::Grounded(_) => S::Grounded(G::Standing),
+    }
+}
+
+fn timeout(state: Stance) -> i8 {
+    use self::AerialStance as A;
+    use self::GroundedStance as G;
+    use self::Stance as S;
+    match state {
+        S::Grounded(G::Standing) => -1,
+        S::Grounded(G::Jabbing) => 13,
+        S::Aerial(A::Falling) => -1,
     }
 }
 
@@ -31,28 +62,65 @@ struct FrameData {
     armour: Armour,
 }
 
-fn state_frame_data(state: State, frame: u8) -> FrameData {
+fn state_frame_data(state: Stance, frame: u8) -> FrameData {
     unimplemented!()
 }
 
-fn standing_input_map(input: InputDiff) -> Option<State> {
+fn standing_input_map(input: InputDiff) -> Option<GroundedStance> {
+    use self::GroundedStance as G;
     if input.get(Button::Hit) == ButtonDiff::Pressed {
-        Some(State::Jabbing)
+        Some(G::Jabbing)
     } else {
         None
     }
 }
 
-fn user_input_map(state: State, input: InputDiff) -> Option<State> {
-    use self::State as S;
+fn falling_input_map(input: InputDiff) -> Option<AerialStance> {
+    None
+}
+
+fn grounded_user_input_map(state: GroundedStance, input: InputDiff) -> Option<GroundedStance> {
+    use self::GroundedStance as G;
     match state {
-        S::Standing => standing_input_map(input),
-        S::Jabbing => None,
+        G::Standing => standing_input_map(input),
+        G::Jabbing => None,
     }
 }
 
-pub fn postbox_input_system(mut query: Query<&mut State, &InputDiff>) {
-    for mut postbox_state in query.iter_mut() {
-        unimplemented!()
+fn aerial_user_input_map(state: AerialStance, input: InputDiff) -> Option<AerialStance> {
+    use self::AerialStance as A;
+    match state {
+        A::Falling => falling_input_map(input),
+    }
+}
+
+fn update_stance(state: &mut PostboxState, new_stance: Stance) {
+    state.countup = 0;
+    state.countdown = timeout(new_stance);
+    state.stance = new_stance;
+}
+
+pub fn postbox_input_system(
+    mut query: Query<(&mut PostboxState, &InputDiff, Option<&StandingOn>)>,
+) {
+    use self::Stance as S;
+    for (mut state, input, standing_on) in query.iter_mut() {
+        if let Some(new_stance) = match state.stance {
+            S::Grounded(g) => grounded_user_input_map(g, *input).map(|res| S::Grounded(res)),
+            S::Aerial(a) => aerial_user_input_map(a, *input).map(|res| S::Aerial(res)),
+        } {
+            update_stance(&mut state, new_stance);
+        } else {
+            state.countup += 1;
+            if state.countdown > 0 {
+                state.countdown -= 1;
+            }
+        }
+        if state.countdown == 0 {
+            let new_stance = timeout_stance(state.stance);
+            if new_stance != state.stance {
+                update_stance(&mut state, new_stance);
+            }
+        }
     }
 }

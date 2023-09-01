@@ -6,6 +6,7 @@ use bytemuck::{Pod, Zeroable};
 
 use std::default::Default;
 
+use crate::machine::postbox::PostboxState;
 use crate::types::*;
 
 #[derive(AssetCollection, Resource)]
@@ -90,13 +91,8 @@ pub enum ButtonDiff {
     Pressed = 3,
 }
 
-pub const fn is_being_pressed(diff: ButtonDiff) -> bool {
-    match diff {
-        ButtonDiff::NotHeld => false,
-        ButtonDiff::Held => true,
-        ButtonDiff::Pressed => true,
-        ButtonDiff::Released => false,
-    }
+pub fn is_being_pressed(diff: ButtonDiff) -> bool {
+    diff == ButtonDiff::Held || diff == ButtonDiff::Pressed
 }
 
 #[derive(Default, Component, Debug, Clone, Copy, PartialEq, Eq, Pod, Zeroable, Reflect)]
@@ -238,14 +234,11 @@ pub fn startup_system(mut commands: Commands, asset_server: Res<AssetServer>) {
             Allegiance {
                 handle: PlayerId(0),
             },
-            Intent(IntentKind::Neutral),
-            FightingStance::default(),
+            PostboxState::default(),
             InputDiff::default(),
             Position { x: 0, y: 86 },
             Velocity { x: 0, y: 0 },
             Acceleration { x: 0, y: 0 },
-            Accelerating {},
-            Moving {},
             StandingOn {
                 platform: PlatformId(0),
             },

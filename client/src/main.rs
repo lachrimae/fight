@@ -1,5 +1,3 @@
-#![feature(hash_set_entry)]
-
 use bevy::log;
 use bevy::prelude::*;
 use bevy::window::WindowResolution;
@@ -72,14 +70,13 @@ fn main() {
                 .with_update_frequency(FPS)
                 .with_input_system(input::input_system)
                 .register_rollback_component::<world::InputDiff>()
-                .register_rollback_component::<world::Intent>()
                 .register_rollback_component::<world::Allegiance>()
-                .register_rollback_component::<world::FightingStance>()
+                .register_rollback_component::<machine::postbox::PostboxState>()
+                .register_rollback_component::<machine::types::Physics>()
+                .register_rollback_component::<machine::types::Armour>()
                 .register_rollback_component::<world::Velocity>()
                 .register_rollback_component::<world::Position>()
                 .register_rollback_component::<world::Acceleration>()
-                .register_rollback_component::<world::Accelerating>()
-                .register_rollback_component::<world::Moving>()
                 .register_rollback_component::<world::Stocks>(),
         )
         .insert_resource(ClearColor(Color::rgb(0.9, 0.9, 0.9)))
@@ -91,10 +88,10 @@ fn main() {
             GgrsSchedule,
             (
                 intent::input_diff_system,
-                stance::set_stance_system,
-                physics::set_physical_props_system,
-                physics::movement_system,
+                machine::postbox::input_system,
+                machine::postbox::physics_system,
                 physics::acceleration_system,
+                physics::movement_system,
                 death::death_system,
             )
                 .chain(),

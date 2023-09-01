@@ -1,6 +1,6 @@
 use crate::input::{Button, InputState};
 use crate::types::*;
-use crate::world::{is_being_pressed, Allegiance, ButtonDiff, InputDiff, Intent, IntentKind};
+use crate::world::{is_being_pressed, Allegiance, ButtonDiff, InputDiff};
 
 use bevy::log;
 use bevy::prelude::*;

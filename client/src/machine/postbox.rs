@@ -1,6 +1,8 @@
 use crate::input::Button;
 use crate::machine::types::{Armour, Physics};
-use crate::world::{ButtonDiff, InputDiff, Orientation, StandingOn};
+use crate::world::{
+    Acceleration, ButtonDiff, InputDiff, Orientation, Position, StandingOn, Velocity,
+};
 use bevy::prelude::*;
 
 #[derive(Copy, Clone, Debug, Default, Reflect, PartialEq, Eq)]
@@ -28,12 +30,23 @@ impl Default for Stance {
     }
 }
 
-#[derive(Component, Default, Reflect)]
+#[derive(Component, Reflect)]
 pub struct PostboxState {
     stance: Stance,
     orientation: Orientation,
     countdown: i8,
     countup: u8,
+}
+
+impl Default for PostboxState {
+    fn default() -> Self {
+        PostboxState {
+            stance: Stance::default(),
+            orientation: Orientation::default(),
+            countdown: -1,
+            countup: 0,
+        }
+    }
 }
 
 fn timeout_stance(state: Stance) -> Stance {
@@ -133,11 +146,13 @@ fn tick_stance(state: &mut PostboxState) {
         state.countdown -= 1;
     }
     assert!(state.countdown >= -1);
+    if state.countdown == 0 {
+        let new_stance = timeout_stance(state.stance);
+        update_stance(state, new_stance);
+    }
 }
 
-pub fn postbox_input_system(
-    mut query: Query<(&mut PostboxState, &mut Physics, &mut Armour, &InputDiff)>,
-) {
+pub fn input_system(mut query: Query<(&mut PostboxState, &mut Physics, &mut Armour, &InputDiff)>) {
     use self::Stance as S;
     for (mut state, mut physics, mut armour, input) in query.iter_mut() {
         let frame = state.countup;
@@ -148,13 +163,20 @@ pub fn postbox_input_system(
             update_stance(&mut state, new_stance);
         } else {
             tick_stance(&mut state);
-            if state.countdown == 0 {
-                let new_stance = timeout_stance(state.stance);
-                update_stance(&mut state, new_stance);
-            }
         }
         let frame_data = stance_frame_data(state.stance, state.countup);
         *armour = frame_data.armour;
         *physics = frame_data.physics;
+    }
+}
+
+pub fn physics_system(
+    mut query: Query<(&Physics, &mut Position, &mut Velocity, &mut Acceleration)>,
+) {
+    for (physics, mut pos, mut vel, mut acc) in query.iter_mut() {
+        match physics {
+            Physics::NotMoving => (),
+            Physics::Falling => vel.y = -10,
+        }
     }
 }

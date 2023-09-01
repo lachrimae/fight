@@ -1,2 +1,2 @@
 pub mod postbox;
-mod types;
+pub mod types;

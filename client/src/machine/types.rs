@@ -35,15 +35,17 @@ impl InputDiff {
     }
 }
 
-#[derive(Component)]
+#[derive(Component, Default, Reflect)]
 pub enum Armour {
+    #[default]
     None,
     HyperArmour,
     Invincibility,
 }
 
-#[derive(Component)]
+#[derive(Component, Default, Reflect)]
 pub enum Physics {
+    #[default]
     NotMoving,
     Falling,
 }
